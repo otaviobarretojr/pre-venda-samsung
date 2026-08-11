@@ -1,0 +1,177 @@
+name: PRE VENDA print/form v4.5.2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/print-form-v452.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v4.5.2 patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Remove a previous copy of this patch if the workflow is re-run.
+          s = re.sub(r'\n<style id="v452-print-form">.*?</style>\n<script id="v452-print-form-script">.*?</script>\n', '\n', s, flags=re.S)
+
+          css = r'''<style id="v452-print-form">
+          /* v4.5.2 — formulário e impressão corporativa */
+          .quick-info{grid-template-columns:repeat(2,1fr)}
+          #metricUltimo{display:none!important}
+          .quick-info .info-card:has(#metricUltimo){display:none!important}
+          #formPanel .card{padding:0;overflow:hidden}
+          #formPanel .section-title{margin:0;padding:22px 24px 18px;border-bottom:1px solid #e7eaf0;font-size:21px;letter-spacing:-.2px;background:linear-gradient(180deg,#fff,#fbfcff)}
+          #formPanel .form-grid{padding:24px;gap:20px 18px}
+          #formPanel .row-actions{margin:0 24px 24px;padding-top:18px}
+          #formPanel .status{margin:0 24px 20px}
+          #formPanel .field label{font-size:11px;letter-spacing:.55px;color:#344054}
+          #formPanel .field input,#formPanel .field select,#formPanel .field textarea{background:#fff;border-color:#d0d5dd;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+          #formPanel .field input:hover,#formPanel .field select:hover,#formPanel .field textarea:hover{border-color:#98a2b3}
+          .field-auto-hidden{display:none!important}
+          .print-only{display:none!important}
+          @media print{
+            @page{size:A4;margin:0}
+            html,body{width:210mm!important;height:297mm!important;background:#fff!important;overflow:hidden!important}
+            .screen-only,.topbar,.quick-info,.panel,.footer-note{display:none!important}
+            .print-only{display:block!important}
+            .app,.content{margin:0!important;padding:0!important;max-width:none!important;width:210mm!important;height:297mm!important}
+            .print-sheet{width:210mm!important;height:296mm!important;padding:13mm 16mm 12mm!important;box-sizing:border-box!important;background:#fff!important;color:#111827!important;font-family:Arial,Helvetica,sans-serif!important;overflow:hidden!important}
+            .pv-doc-head{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:7mm;border-bottom:1.4px solid #1428A0}
+            .pv-brand{font-size:26px;font-weight:900;letter-spacing:3px;color:#1428A0;line-height:1}
+            .pv-head-right{text-align:right}.pv-kicker{font-size:10px;font-weight:800;letter-spacing:1.5px;color:#667085}.pv-date{font-size:12px;margin-top:2mm;color:#344054}
+            .pv-title{margin:9mm 0 2mm;font-size:27px;line-height:1.1;letter-spacing:-.7px}.pv-subtitle{font-size:12px;color:#667085;margin-bottom:8mm}
+            .pv-block{border:1px solid #e4e7ec;border-radius:4mm;padding:5mm 6mm;margin-bottom:5mm;break-inside:avoid}
+            .pv-block-title{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#1428A0;margin-bottom:4mm;text-transform:uppercase}
+            .pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}.pv-row{min-width:0}.pv-row.full{grid-column:1/-1}
+            .pv-label{font-size:9.5px;color:#667085;text-transform:uppercase;letter-spacing:.45px;margin-bottom:1mm}.pv-value{font-size:14px;font-weight:700;line-height:1.25;word-break:break-word}.pv-value.big{font-size:17px}
+            .pv-payment{display:flex;align-items:flex-end;justify-content:space-between;gap:10mm}.pv-payment .pv-value{font-size:22px;color:#1428A0}
+            .pv-note{font-size:11.5px;line-height:1.5;color:#344054;margin:0}
+            .pv-alert{border-left:3px solid #1428A0;background:#f6f7ff;padding:4mm 5mm;margin:5mm 0;font-size:11px;line-height:1.45;color:#344054}
+            .pv-status{display:flex;gap:5mm;margin-top:4mm}.pv-chip{border:1px solid #d0d5dd;border-radius:999px;padding:2mm 4mm;font-size:10.5px;font-weight:800}
+            .pv-sign{margin-top:11mm;display:flex;justify-content:flex-end}.pv-sign-line{width:70mm;border-top:1px solid #667085;padding-top:2mm;text-align:center;font-size:10px;color:#667085}
+            .pv-congrats{margin-top:9mm;padding-top:5mm;border-top:1px solid #e4e7ec;text-align:center;font-size:15px;font-weight:900;letter-spacing:.7px;color:#1428A0}.pv-congrats small{display:block;margin-top:1.5mm;font-size:9.5px;font-weight:500;letter-spacing:.2px;color:#98a2b3}
+          }
+          </style>'''
+
+          js = r'''<script id="v452-print-form-script">
+          (()=>{
+            const byId=id=>document.getElementById(id);
+            const normalize=v=>String(v??'').trim();
+            const currentProduct=()=>getCatalog().find(p=>p.name===byId('produto').value);
+
+            // Número de pré-venda removido da operação a partir da v4.5.2.
+            window.nextNumber=()=>'';
+            window.collect=function(){
+              return {
+                id:editingId||crypto.randomUUID(),
+                numero:'',
+                valor:byId('valor').value.trim(),data:byId('data').value,
+                cliente:byId('cliente').value.trim(),cpf:byId('cpf').value.trim(),
+                produto:byId('produto').value,capacidade:byId('capacidade').value,cor:byId('cor').value,
+                vendedor:byId('vendedor').value,preregistro:byId('preregistro').value,trocafone:byId('trocafone').value,
+                obsInterna:byId('obsInterna').value.trim(),updatedAt:new Date().toISOString()
+              };
+            };
+
+            const oldProductChange=window.onProductChange;
+            window.onProductChange=function(){
+              oldProductChange();
+              const p=currentProduct();
+              const capField=byId('capacidade')?.closest('.field');
+              const colorField=byId('cor')?.closest('.field');
+              capField?.classList.remove('field-auto-hidden');
+              colorField?.classList.remove('field-auto-hidden');
+              if(!p)return;
+              const caps=p.capacities||[], colors=p.colors||[];
+              if(caps.length===1){byId('capacidade').value=caps[0];if(/^não se aplica$/i.test(caps[0]))capField?.classList.add('field-auto-hidden')}
+              if(colors.length===1){
+                byId('cor').value=colors[0];
+                if(normalize(p.name).toLowerCase().includes(normalize(colors[0]).toLowerCase())) colorField?.classList.add('field-auto-hidden');
+              }
+            };
+            byId('produto')?.addEventListener('change',()=>setTimeout(window.onProductChange,0));
+
+            const printWrap=document.querySelector('.print-only');
+            if(printWrap){printWrap.innerHTML=`<div class="print-sheet" id="printArea">
+              <div class="pv-doc-head"><div class="pv-brand">SAMSUNG</div><div class="pv-head-right"><div class="pv-kicker">PRÉ-VENDA · DECLARAÇÃO DE COMPRA</div><div class="pv-date" id="docData">—</div></div></div>
+              <h1 class="pv-title">Declaração de Compra</h1><div class="pv-subtitle">Documento para retirada de produto adquirido em pré-venda.</div>
+              <div class="pv-block"><div class="pv-block-title">Dados do cliente</div><div class="pv-grid"><div class="pv-row full"><div class="pv-label">Nome</div><div class="pv-value big" id="docCliente">—</div></div><div class="pv-row"><div class="pv-label">CPF</div><div class="pv-value" id="docCpf">—</div></div></div></div>
+              <div class="pv-block"><div class="pv-block-title">Produto</div><div class="pv-grid"><div class="pv-row full"><div class="pv-label">Produto</div><div class="pv-value big" id="docProduto">—</div></div><div class="pv-row" id="docCapRow"><div class="pv-label">Memória / capacidade</div><div class="pv-value" id="docCapacidade">—</div></div><div class="pv-row" id="docColorRow"><div class="pv-label">Cor</div><div class="pv-value" id="docCor">—</div></div><div class="pv-row full"><div class="pv-label">Consultor</div><div class="pv-value" id="docVendedor">—</div></div></div></div>
+              <div class="pv-block"><div class="pv-block-title">Pagamento</div><div class="pv-payment"><div><div class="pv-label">Valor pago</div><div class="pv-value">R$ <span id="docValor">—</span></div></div><div class="pv-date">Data: <strong id="docDatePayment">—</strong></div></div></div>
+              <p class="pv-note">Declaramos, para os devidos fins, que o cliente acima identificado efetuou o pagamento parcial referente ao produto em pré-venda na presente data. A retirada da mercadoria deverá ocorrer mediante apresentação desta declaração e documento oficial com foto.</p>
+              <div class="pv-alert"><strong>IMPORTANTE:</strong> caso não haja disponibilidade da cor escolhida, entraremos em contato para alteração. A retirada do produto deverá ocorrer, sem exceções, em até 02 dias após o contato da loja informando a chegada do produto.</div>
+              <div class="pv-note">A avaliação da TrocaSmart será válida para o produto apresentado no dia da retirada, conforme as regras vigentes do programa.</div>
+              <div class="pv-status"><div class="pv-chip">Pré-registro: <span id="docPre">—</span></div><div class="pv-chip">TrocaSmart: <span id="docTroca">—</span></div></div>
+              <div class="pv-sign"><div class="pv-sign-line">Rubrica</div></div>
+              <div class="pv-congrats">PARABÉNS PELA SUA COMPRA<small>LOJA SAMSUNG</small></div>
+            </div>`}
+
+            window.renderDoc=function(d){
+              byId('docValor').textContent=d.valor||'________';byId('docCliente').textContent=d.cliente||'—';byId('docCpf').textContent=d.cpf||'—';
+              byId('docProduto').textContent=d.produto||'—';byId('docCapacidade').textContent=d.capacidade||'—';byId('docCor').textContent=d.cor||'—';byId('docVendedor').textContent=d.vendedor||'—';
+              byId('docPre').textContent=d.preregistro||'—';byId('docTroca').textContent=d.trocafone||'—';
+              const date=formatDateBR(d.data||todayISO());byId('docData').textContent=date;byId('docDatePayment').textContent=date;
+              byId('docCapRow').style.display=/^não se aplica$/i.test(normalize(d.capacidade))?'none':'';
+              byId('docColorRow').style.display=(d.cor&&normalize(d.produto).toLowerCase().includes(normalize(d.cor).toLowerCase()))?'none':'';
+            };
+
+            window.updateMetrics=function(){const h=getHistory(),t=todayISO();byId('metricTotal').textContent=h.length;byId('metricHoje').textContent=h.filter(x=>x.data===t).length};
+            window.renderHistory=function(){
+              updateMetrics();const q=byId('busca').value.trim().toLowerCase();let h=getHistory();
+              if(q)h=h.filter(d=>[d.cliente,d.cpf,d.produto,d.capacidade,d.cor,d.vendedor].some(v=>String(v||'').toLowerCase().includes(q)));
+              if(!h.length){byId('historyContent').innerHTML='<div class="empty">Nenhuma pré-venda encontrada.</div>';return}
+              byId('historyContent').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>CPF</th><th>Produto</th><th>Vendedor</th><th>Ações</th></tr></thead><tbody>${h.map(d=>`<tr><td>${formatDateBR(d.data)}</td><td>${escapeHtml(d.cliente||'')}</td><td>${escapeHtml(maskedCpf(d.cpf||''))}</td><td>${escapeHtml([d.produto,/^não se aplica$/i.test(d.capacidade||'')?'':d.capacidade,(d.cor&&String(d.produto||'').toLowerCase().includes(String(d.cor).toLowerCase()))?'':d.cor].filter(Boolean).join(' • '))}</td><td>${escapeHtml(d.vendedor||'')}</td><td><div class="mini-actions"><button class="btn-outline" onclick="printRecord('${d.id}')">Imprimir</button><button class="btn-outline" onclick="loadRecord('${d.id}')">Editar</button><button class="btn-danger" onclick="deleteRecord('${d.id}')">Excluir</button></div></td></tr>`).join('')}</tbody></table></div>`;
+            };
+            window.exportCSV=function(){const h=getHistory();if(!h.length)return alert('Não há dados.');const cols=['data','cliente','cpf','produto','capacidade','cor','vendedor','preregistro','trocafone','valor','obsInterna'],rows=[cols.join(';'),...h.map(d=>cols.map(c=>`"${String(d[c]??'').replace(/"/g,'""')}"`).join(';'))];const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`pre-vendas-${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href)};
+            byId('exportarBtn').onclick=window.exportCSV;
+            const oldLoad=window.loadRecord;window.loadRecord=async function(id){await oldLoad(id);setTimeout(window.onProductChange,0)};
+            const oldStatus=window.status;window.status=oldStatus;
+            document.querySelector('.footer-note').textContent='PRE VENDA • v4.5.2';
+            window.onProductChange();renderHistory();updateMetrics();
+          })();
+          </script>'''
+
+          s = s.replace('</body>', '\n'+css+'\n'+js+'\n</body>')
+          s = s.replace("service-worker.js?v=4.5.1", "service-worker.js?v=4.5.2")
+          p.write_text(s, encoding='utf-8')
+
+          sw = Path('service-worker.js')
+          if sw.exists():
+              x=sw.read_text(encoding='utf-8').replace('pre-venda-samsung-v4-5-1','pre-venda-samsung-v4-5-2')
+              sw.write_text(x,encoding='utf-8')
+          PY
+      - name: Audit patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          checks={
+            'patch css': 'id="v452-print-form"' in s,
+            'patch js': 'id="v452-print-form-script"' in s,
+            'no generated number in new collect': "numero:''," in s,
+            'new print title': 'PRÉ-VENDA · DECLARAÇÃO DE COMPRA' in s,
+            'history without number': '<th>Data</th><th>Cliente</th>' in s,
+            'service worker v452': 'service-worker.js?v=4.5.2' in s,
+          }
+          failed=[k for k,v in checks.items() if not v]
+          print(checks)
+          if failed: raise SystemExit('Audit failed: '+', '.join(failed))
+          PY
+      - name: Commit v4.5.2
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          git commit -m "feat: redesign print document and remove sale numbering"
+          git push
