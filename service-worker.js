@@ -1,11 +1,11 @@
-const CACHE_NAME = "pre-venda-samsung-v4-3-1";
+const CACHE_NAME = "pre-venda-samsung-v4-3-2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
-  "./admin-lock.js"
+  "./admin-lock.js?v=4.3.2"
 ];
 
 self.addEventListener("install", event => {
@@ -17,24 +17,26 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-    ))
+    )).then(()=>self.clients.claim()))
   );
-  self.clients.claim();
 });
 
 async function injectAdminLock(response){
   const text=await response.text();
   let injected=text;
-  if(!injected.includes('admin-lock.js')){
-    injected=injected.replace('</body>','<script src="./admin-lock.js?v=4.3.1"></script></body>');
+  if(!injected.includes('admin-lock.js?v=4.3.2')){
+    injected=injected.replace('</body>','<script src="./admin-lock.js?v=4.3.2"></script></body>');
   }
-  return new Response(injected,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
+  return new Response(injected,{
+    status:response.status,
+    statusText:response.statusText,
+    headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'}
+  });
 }
 
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
-
   const url = new URL(req.url);
 
   if (url.hostname.includes("supabase.co") || url.hostname.includes("jsdelivr.net")) {
@@ -53,7 +55,7 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith(
-    fetch(req)
+    fetch(req,{cache:'no-store'})
       .then(response => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
