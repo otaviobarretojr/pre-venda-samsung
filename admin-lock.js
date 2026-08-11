@@ -1,4 +1,4 @@
-// PRE VENDA v4.3.2 — uso livre + bloqueio administrativo por PIN
+// PRE VENDA v4.3.3 — uso livre + bloqueio administrativo por PIN
 (function(){
   const PIN_KEY='preVendaAdminPinHash';
   const UNLOCK_KEY='preVendaAdminUnlockedUntil';
@@ -12,21 +12,16 @@
   function isUnlocked(){return Number(sessionStorage.getItem(UNLOCK_KEY)||0)>Date.now();}
   function lock(){sessionStorage.removeItem(UNLOCK_KEY);refreshAdminButton();}
 
-  function removeLoginUi(){
-    const auth=document.getElementById('authCard');
-    if(auth) auth.style.display='none';
-
-    const badge=document.querySelector('.online-badge');
-    const dot=document.getElementById('onlineDot');
-    const text=document.getElementById('onlineText');
-    if(badge){
-      badge.title='Sistema disponível para uso';
-      if(dot){dot.className='online-dot ok';}
-      if(text) text.textContent='Ativo';
-    }
-
-    // Remove qualquer texto antigo de autenticação que eventualmente seja recriado.
-    document.querySelectorAll('.auth-card').forEach(el=>el.style.display='none');
+  function removeUserAccessUi(){
+    // Remove de vez a interface antiga de usuário/login.
+    ['authCard','loginCard','userCard'].forEach(id=>document.getElementById(id)?.remove());
+    ['loginBtn','logoutBtn','syncBtn'].forEach(id=>document.getElementById(id)?.remove());
+    document.querySelector('.online-badge')?.remove();
+    document.querySelectorAll('[id*="currentUser"],[id*="roleBadge"]').forEach(el=>el.remove());
+    document.querySelectorAll('input[type="email"],input[type="password"]').forEach(input=>{
+      const card=input.closest('.auth-card');
+      if(card)card.remove();
+    });
   }
 
   async function setupPin(){
@@ -90,7 +85,6 @@
     refreshAdminButton();
   }
 
-  // Intercepta Configurações antes do listener original do app.
   document.addEventListener('click',async function(e){
     const target=e.target.closest('button,label');if(!target)return;
     const tab=target.closest('[data-tab="settingsPanel"]');
@@ -165,7 +159,7 @@
   }
 
   function init(){
-    removeLoginUi();
+    removeUserAccessUi();
     addAdminButton();
     wrapProtectedFunctions();
     addPinControls();
@@ -177,5 +171,5 @@
   else setTimeout(init,0);
   setTimeout(init,300);
   setTimeout(init,1200);
-  setInterval(()=>{removeLoginUi();refreshAdminButton();wrapProtectedFunctions();},5000);
+  setInterval(()=>{removeUserAccessUi();refreshAdminButton();wrapProtectedFunctions();},5000);
 })();
