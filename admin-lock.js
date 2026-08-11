@@ -1,4 +1,4 @@
-// PRE VENDA v4.3.4 — uso livre + bloqueio administrativo por PIN + UX do formulário
+// PRE VENDA v4.3.5 — uso livre + bloqueio administrativo por PIN + UX do formulário
 (function(){
   const PIN_KEY='preVendaAdminPinHash';
   const UNLOCK_KEY='preVendaAdminUnlockedUntil';
@@ -12,6 +12,22 @@
   function isUnlocked(){return Number(sessionStorage.getItem(UNLOCK_KEY)||0)>Date.now();}
   function lock(){sessionStorage.removeItem(UNLOCK_KEY);refreshAdminButton();}
 
+  function setDocumentPreviewVisible(visible){
+    document.querySelectorAll('.doc-wrap').forEach(el=>{
+      if(visible){
+        el.hidden=false;
+        el.style.removeProperty('display');
+      }else{
+        el.hidden=true;
+        el.style.setProperty('display','none','important');
+      }
+    });
+  }
+
+  function enforceDocumentPreviewHidden(){
+    if(!window.matchMedia('print').matches) setDocumentPreviewVisible(false);
+  }
+
   function applyVisualRefresh(){
     if(document.getElementById('preVendaVisualRefresh'))return;
     const style=document.createElement('style');
@@ -23,15 +39,10 @@
       .brand h1{font-size:24px!important;line-height:1.05!important}
       .brand small{font-size:12px!important;color:rgba(255,255,255,.82)!important}
 
-      @media screen{
-        .doc-wrap{display:none!important}
-      }
-      @media print{
-        .doc-wrap{display:block!important}
-      }
+      @media screen{.doc-wrap{display:none!important}}
+      @media print{.doc-wrap{display:block!important}}
 
-      #formPanel>.card,
-      #formPanel .card{border:1px solid #e3e8f2!important;border-radius:20px!important;box-shadow:0 8px 28px rgba(16,24,40,.055)!important;padding:26px!important;background:#fff!important}
+      #formPanel>.card,#formPanel .card{border:1px solid #e3e8f2!important;border-radius:20px!important;box-shadow:0 8px 28px rgba(16,24,40,.055)!important;padding:26px!important;background:#fff!important}
       #formPanel .section-title{font-size:18px!important;letter-spacing:-.1px!important;margin-bottom:18px!important;color:#101828!important}
       #formPanel .grid{gap:18px!important}
       #formPanel label{font-size:12px!important;text-transform:uppercase!important;letter-spacing:.35px!important;color:#475467!important;margin-bottom:7px!important}
@@ -108,7 +119,13 @@
   function addPinControls(){const panel=document.getElementById('settingsPanel');if(!panel||document.getElementById('adminPinBox'))return;const grid=panel.querySelector('.settings-grid');if(!grid)return;const box=document.createElement('div');box.id='adminPinBox';box.className='settings-box';box.innerHTML='<h3>Segurança administrativa</h3><div class="muted-box">O uso normal do sistema é livre. Configurações, edição, exclusão, consultores e backup exigem PIN gerencial. Após desbloquear, o acesso fica liberado por 10 minutos neste navegador.</div><div class="backup-row" style="margin-top:12px"><button id="changeAdminPinBtn" class="btn-outline" type="button">Alterar PIN</button><button id="lockAdminNowBtn" class="btn-light" type="button">Bloquear agora</button></div>';grid.appendChild(box);box.querySelector('#changeAdminPinBtn').onclick=changePin;box.querySelector('#lockAdminNowBtn').onclick=()=>{lock();alert('Administração bloqueada.');};}
   function ensureSettingsClosed(){const settings=document.getElementById('settingsPanel');if(settings?.classList.contains('active')&&!isUnlocked()&&typeof window.switchTab==='function')window.switchTab('homePanel');}
 
-  function init(){applyVisualRefresh();removeLoginUi();addAdminButton();wrapProtectedFunctions();addPinControls();ensureSettingsClosed();refreshAdminButton();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
-  setTimeout(init,300);setTimeout(init,1200);setInterval(()=>{removeLoginUi();refreshAdminButton();wrapProtectedFunctions();},5000);
+  function init(){applyVisualRefresh();removeLoginUi();addAdminButton();wrapProtectedFunctions();addPinControls();ensureSettingsClosed();refreshAdminButton();enforceDocumentPreviewHidden();}
+
+  window.addEventListener('beforeprint',()=>setDocumentPreviewVisible(true));
+  window.addEventListener('afterprint',()=>setDocumentPreviewVisible(false));
+  const previewObserver=new MutationObserver(()=>enforceDocumentPreviewHidden());
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(init,0);previewObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']});});
+  else{setTimeout(init,0);previewObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']});}
+  setTimeout(init,300);setTimeout(init,1200);setInterval(()=>{removeLoginUi();refreshAdminButton();wrapProtectedFunctions();enforceDocumentPreviewHidden();},3000);
 })();
