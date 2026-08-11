@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pre-venda-samsung-v4-4-1';
+const CACHE_NAME = 'pre-venda-samsung-v4-5-0';
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,6 +23,11 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+
+  if (url.hostname.includes('supabase.co')) {
+    event.respondWith(fetch(req));
+    return;
+  }
 
   if (req.mode === 'navigate') {
     event.respondWith(
