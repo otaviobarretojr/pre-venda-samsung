@@ -1,11 +1,11 @@
-const CACHE_NAME = "pre-venda-samsung-v4-3-2";
+const CACHE_NAME = "pre-venda-samsung-v4-3-3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
-  "./admin-lock.js?v=4.3.2"
+  "./admin-lock.js?v=4.3.3"
 ];
 
 self.addEventListener("install", event => {
@@ -24,8 +24,8 @@ self.addEventListener("activate", event => {
 async function injectAdminLock(response){
   const text=await response.text();
   let injected=text;
-  if(!injected.includes('admin-lock.js?v=4.3.2')){
-    injected=injected.replace('</body>','<script src="./admin-lock.js?v=4.3.2"></script></body>');
+  if(!injected.includes('admin-lock.js?v=4.3.3')){
+    injected=injected.replace('</body>','<script src="./admin-lock.js?v=4.3.3"></script></body>');
   }
   return new Response(injected,{
     status:response.status,
