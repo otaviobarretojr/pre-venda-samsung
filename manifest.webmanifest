@@ -1,12 +1,12 @@
 {
-  "name": "Pré-venda Samsung",
-  "short_name": "Pré-venda",
-  "description": "Sistema online de pré-vendas, declarações e dashboard gerencial.",
+  "name": "PRE VENDA",
+  "short_name": "PRE VENDA",
+  "description": "Sistema de pré-vendas, declarações, histórico e dashboard gerencial.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fb",
-  "theme_color": "#1428a0",
+  "background_color": "#f4f6fb",
+  "theme_color": "#1428A0",
   "icons": [
     {
       "src": "./icon-192.png",
