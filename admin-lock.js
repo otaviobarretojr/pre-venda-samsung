@@ -1,4 +1,4 @@
-// PRE VENDA v4.3.5 — uso livre + bloqueio administrativo por PIN + UX do formulário
+// PRE VENDA v4.3.7 — uso livre + bloqueio administrativo por PIN + UX do formulário
 (function(){
   const PIN_KEY='preVendaAdminPinHash';
   const UNLOCK_KEY='preVendaAdminUnlockedUntil';
@@ -17,31 +17,35 @@
       if(visible){
         el.hidden=false;
         el.style.removeProperty('display');
+        el.style.removeProperty('visibility');
+        el.style.removeProperty('height');
       }else{
         el.hidden=true;
         el.style.setProperty('display','none','important');
+        el.style.setProperty('visibility','hidden','important');
+        el.style.setProperty('height','0','important');
+        el.style.setProperty('min-height','0','important');
+        el.style.setProperty('margin','0','important');
+        el.style.setProperty('padding','0','important');
+        el.style.setProperty('overflow','hidden','important');
       }
     });
   }
-
   function enforceDocumentPreviewHidden(){
     if(!window.matchMedia('print').matches) setDocumentPreviewVisible(false);
   }
 
   function applyVisualRefresh(){
-    if(document.getElementById('preVendaVisualRefresh'))return;
-    const style=document.createElement('style');
-    style.id='preVendaVisualRefresh';
+    let style=document.getElementById('preVendaVisualRefresh');
+    if(!style){style=document.createElement('style');style.id='preVendaVisualRefresh';document.head.appendChild(style);}
     style.textContent=`
       body{font-family:"Samsung Sharp Sans","SamsungOne",Arial,Helvetica,sans-serif;background:#f4f6fb}
       .topbar{background:#1428A0!important;box-shadow:0 8px 24px rgba(20,40,160,.14)!important}
       .brand-mark{background:transparent!important;color:#fff!important;border-radius:0!important;padding:0!important;font-size:21px!important;letter-spacing:2.5px!important}
       .brand h1{font-size:24px!important;line-height:1.05!important}
       .brand small{font-size:12px!important;color:rgba(255,255,255,.82)!important}
-
-      @media screen{.doc-wrap{display:none!important}}
-      @media print{.doc-wrap{display:block!important}}
-
+      @media screen{.doc-wrap{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}}
+      @media print{.doc-wrap{display:block!important;visibility:visible!important;height:auto!important}}
       #formPanel>.card,#formPanel .card{border:1px solid #e3e8f2!important;border-radius:20px!important;box-shadow:0 8px 28px rgba(16,24,40,.055)!important;padding:26px!important;background:#fff!important}
       #formPanel .section-title{font-size:18px!important;letter-spacing:-.1px!important;margin-bottom:18px!important;color:#101828!important}
       #formPanel .grid{gap:18px!important}
@@ -59,7 +63,6 @@
       .info-card{border-radius:16px!important;box-shadow:0 4px 16px rgba(16,24,40,.04)!important}
       @media(max-width:760px){#formPanel>.card,#formPanel .card{padding:18px!important;border-radius:16px!important}#formPanel .grid{gap:14px!important}}
     `;
-    document.head.appendChild(style);
   }
 
   function removeLoginUi(){
@@ -127,5 +130,7 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(init,0);previewObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']});});
   else{setTimeout(init,0);previewObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']});}
-  setTimeout(init,300);setTimeout(init,1200);setInterval(()=>{removeLoginUi();refreshAdminButton();wrapProtectedFunctions();enforceDocumentPreviewHidden();},3000);
+  setTimeout(init,200);setTimeout(init,800);setInterval(()=>{removeLoginUi();refreshAdminButton();wrapProtectedFunctions();enforceDocumentPreviewHidden();},1500);
+
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});}
 })();
