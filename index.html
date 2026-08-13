@@ -140,7 +140,7 @@ let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>
     <h1 class="pv-title">Declaração de Compra</h1><div class="pv-subtitle">Documento para retirada de produto adquirido em pré-venda.</div>
     <div class="pv-block"><div class="pv-block-title">Dados do cliente</div><div class="pv-grid"><div class="pv-row full"><div class="pv-label">Nome</div><div class="pv-value big" id="docCliente">—</div></div><div class="pv-row"><div class="pv-label">CPF</div><div class="pv-value" id="docCpf">—</div></div></div></div>
     <div class="pv-block"><div class="pv-block-title">Produto</div><div class="pv-grid"><div class="pv-row full"><div class="pv-label">Produto</div><div class="pv-value big" id="docProduto">—</div></div><div class="pv-row" id="docCapRow"><div class="pv-label">Memória / capacidade</div><div class="pv-value" id="docCapacidade">—</div></div><div class="pv-row" id="docColorRow"><div class="pv-label">Cor</div><div class="pv-value" id="docCor">—</div></div><div class="pv-row full"><div class="pv-label">Consultor</div><div class="pv-value" id="docVendedor">—</div></div></div></div>
-    <div class="pv-block"><div class="pv-block-title">Pagamento</div><div class="pv-payment"><div><div class="pv-label">Valor pago</div><div class="pv-value">R$ <span id="docValor">—</span></div></div><div class="pv-date">Data: <strong id="docDatePayment">—</strong></div></div></div>
+    <div class="pv-block"><div class="pv-block-title">Pagamento</div><div class="pv-payment"><div><div class="pv-label">Valor pago</div><div class="pv-value">R$ <span id="docValor">—</span></div></div></div></div>
     <p class="pv-note">Declaramos, para os devidos fins, que o cliente acima identificado efetuou o pagamento parcial referente ao produto em pré-venda na presente data. A retirada da mercadoria deverá ocorrer mediante apresentação desta declaração e documento oficial com foto.</p>
     <div class="pv-alert"><strong>IMPORTANTE:</strong> caso não haja disponibilidade da cor escolhida, entraremos em contato para alteração. A retirada do produto deverá ocorrer, sem exceções, em até 02 dias após o contato da loja informando a chegada do produto.</div>
     <div class="pv-note">A avaliação da TrocaSmart será válida para o produto apresentado no dia da retirada, conforme as regras vigentes do programa.</div>
@@ -153,7 +153,7 @@ let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>
     byId('docValor').textContent=d.valor||'________';byId('docCliente').textContent=d.cliente||'—';byId('docCpf').textContent=d.cpf||'—';
     byId('docProduto').textContent=d.produto||'—';byId('docCapacidade').textContent=d.capacidade||'—';byId('docCor').textContent=d.cor||'—';byId('docVendedor').textContent=d.vendedor||'—';
     byId('docPre').textContent=d.preregistro||'—';byId('docTroca').textContent=d.trocafone||'—';
-    const date=formatDateBR(d.data||todayISO());byId('docData').textContent=date;byId('docDatePayment').textContent=date;
+    const date=formatDateBR(d.data||todayISO());byId('docData').textContent=date;
     byId('docCapRow').style.display=/^não se aplica$/i.test(normalize(d.capacidade))?'none':'';
     byId('docColorRow').style.display=(d.cor&&normalize(d.produto).toLowerCase().includes(normalize(d.cor).toLowerCase()))?'none':'';
   };
@@ -173,5 +173,5 @@ let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>
   window.onProductChange();renderHistory();updateMetrics();
 })();
 </script>
-<script src="./ecosystem-v454.js?v=4.5.5"></script>
+<script src="./ecosystem-v454.js?v=4.5.6"></script>
 </body></html>
