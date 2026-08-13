@@ -1,0 +1,52 @@
+name: PRE VENDA v5 release
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v5.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: |
+          node --check v5.js
+          node --check ecosystem-v454.js
+      - name: Inject v5 assets and update service worker
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'<link rel="stylesheet" href="\./v5\.css[^>]*>','',s)
+          s=re.sub(r'<script src="\./v5\.js[^>]*></script>','',s)
+          s=s.replace('</head>','<link rel="stylesheet" href="./v5.css?v=5.0">\n</head>')
+          s=s.replace('</body>','<script src="./v5.js?v=5.0"></script>\n</body>')
+          s=s.replace('service-worker.js?v=4.5.2','service-worker.js?v=5.0')
+          p.write_text(s,encoding='utf-8')
+          sw=Path('service-worker.js')
+          sw.write_text("""const CACHE_NAME='pre-venda-samsung-v5-0';
+const APP_SHELL=['./','./index.html','./ecosystem-v454.js','./v5.js','./v5.css','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(u.hostname.includes('supabase.co')){e.respondWith(fetch(r));return;}if(r.mode==='navigate'){e.respondWith(fetch(r,{cache:'no-store'}).then(resp=>{const c=resp.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',c));return resp;}).catch(()=>caches.match('./index.html')));return;}e.respondWith(fetch(r,{cache:'no-store'}).then(resp=>{if(resp.ok&&u.origin===self.location.origin){const c=resp.clone();caches.open(CACHE_NAME).then(cache=>cache.put(r,c));}return resp;}).catch(()=>caches.match(r)));});
+""",encoding='utf-8')
+          PY
+      - name: Sanity checks
+        run: |
+          grep -q 'v5.css?v=5.0' index.html
+          grep -q 'ecosystem-v454.js?v=4.5.5' index.html
+          grep -q 'v5.js?v=5.0' index.html
+          grep -q "pre-venda-samsung-v5-0" service-worker.js
+          grep -q 'Status da pré-venda' v5.js
+          grep -q 'Backup e recuperação' v5.js
+      - name: Commit release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          git commit -m "feat: release PRE VENDA v5.0" || exit 0
+          git push
