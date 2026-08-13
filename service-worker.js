@@ -1,7 +1,8 @@
-const CACHE_NAME = 'pre-venda-samsung-v4-5-2';
+const CACHE_NAME = 'pre-venda-samsung-v4-5-3';
 const APP_SHELL = [
   './',
   './index.html',
+  './dual-lines.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
@@ -30,15 +31,22 @@ self.addEventListener('fetch', event => {
   }
 
   if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req, { cache: 'no-store' })
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', clone));
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
+    event.respondWith((async()=>{
+      try {
+        const response=await fetch(req,{cache:'no-store'});
+        let html=await response.text();
+        if(!html.includes('dual-lines.js')) html=html.replace('</body>','<script src="./dual-lines.js?v=4.5.3"></script></body>');
+        const out=new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8'}});
+        const clone=out.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',clone));
+        return out;
+      } catch(e) {
+        const cached=await caches.match('./index.html');
+        if(!cached) throw e;
+        let html=await cached.text();
+        if(!html.includes('dual-lines.js')) html=html.replace('</body>','<script src="./dual-lines.js?v=4.5.3"></script></body>');
+        return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8'}});
+      }
+    })());
     return;
   }
 
