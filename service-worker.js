@@ -1,8 +1,8 @@
-const CACHE_NAME = 'pre-venda-samsung-v4-5-3';
+const CACHE_NAME = 'pre-venda-samsung-v4-5-4';
 const APP_SHELL = [
   './',
   './index.html',
-  './dual-lines.js',
+  './ecosystem-v454.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
@@ -35,7 +35,8 @@ self.addEventListener('fetch', event => {
       try {
         const response=await fetch(req,{cache:'no-store'});
         let html=await response.text();
-        if(!html.includes('dual-lines.js')) html=html.replace('</body>','<script src="./dual-lines.js?v=4.5.3"></script></body>');
+        html=html.replace(/<script src="\.\/dual-lines\.js[^>]*><\/script>/g,'');
+        if(!html.includes('ecosystem-v454.js')) html=html.replace('</body>','<script src="./ecosystem-v454.js?v=4.5.4"></script></body>');
         const out=new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8'}});
         const clone=out.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',clone));
         return out;
@@ -43,7 +44,8 @@ self.addEventListener('fetch', event => {
         const cached=await caches.match('./index.html');
         if(!cached) throw e;
         let html=await cached.text();
-        if(!html.includes('dual-lines.js')) html=html.replace('</body>','<script src="./dual-lines.js?v=4.5.3"></script></body>');
+        html=html.replace(/<script src="\.\/dual-lines\.js[^>]*><\/script>/g,'');
+        if(!html.includes('ecosystem-v454.js')) html=html.replace('</body>','<script src="./ecosystem-v454.js?v=4.5.4"></script></body>');
         return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8'}});
       }
     })());
