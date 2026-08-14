@@ -19,15 +19,24 @@ function barsHtml(entries){
   const max=Math.max(...entries.map(([,v])=>v),1);
   return entries.map(([k,v])=>`<div class="bar-row"><div>${esc(k)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div><strong>${v}</strong></div>`).join('');
 }
+function familyOrder(product){
+  const p=String(product||'').toLowerCase();
+  if(p.includes('z flip'))return 1;
+  if(p.includes('z fold')&&!p.includes('ultra'))return 2;
+  if(p.includes('z fold')&&p.includes('ultra'))return 3;
+  return 99;
+}
 function renderProductColors(data){
   const map=new Map();
   for(const d of data){
     const product=String(d.produto||'').trim(),color=String(d.cor||'').trim();
     if(!product||!color)continue;
     const key=`${product} ${color}`;
-    map.set(key,(map.get(key)||0)+1);
+    if(!map.has(key))map.set(key,{count:0,product,color});
+    map.get(key).count++;
   }
-  const entries=[...map.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR'));
+  const rows=[...map.values()].sort((a,b)=>familyOrder(a.product)-familyOrder(b.product)||a.product.localeCompare(b.product,'pt-BR',{numeric:true})||a.color.localeCompare(b.color,'pt-BR'));
+  const entries=rows.map(x=>[`${x.product} ${x.color}`,x.count]);
   const box=ensureColorSection();if(box)box.innerHTML=barsHtml(entries);
 }
 function renderDailyAscending(data){
@@ -47,5 +56,5 @@ window.renderDashboard=function(){
 ['dashStart','dashEnd','dashConsultant'].forEach(id=>$(id)?.addEventListener('change',()=>window.renderDashboard()));
 $('dashRefreshBtn')?.addEventListener('click',()=>window.renderDashboard());
 window.renderDashboard();
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.5 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.6 ONLINE';
 })();
