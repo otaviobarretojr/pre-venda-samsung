@@ -38,6 +38,13 @@ function setSaveButtonBusy(on){
   });
 }
 function labelSaveButton(){formSaveButtons().forEach(b=>b.textContent='Salvar e imprimir')}
+function resetSaveState(){
+  saving=false;
+  justSaved=false;
+  lastSaved=null;
+  setSaveButtonBusy(false);
+  labelSaveButton();
+}
 function markChanged(e){
   if(!justSaved)return;
   if(e?.isTrusted===false)return;
@@ -108,7 +115,11 @@ window.saveCurrent=async function(){
 
 const saveButton=document.getElementById('salvarBtn');
 if(saveButton)saveButton.onclick=window.saveCurrent;
+const newButton=document.getElementById('novoBtn');
+if(newButton)newButton.addEventListener('click',resetSaveState,true);
+const baseStartNewSale=window.startNewSale;
+if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();return baseStartNewSale.apply(this,arguments)};
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.17 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.18 ONLINE';
 })();
