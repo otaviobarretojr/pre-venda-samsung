@@ -16,7 +16,8 @@ function uniqueGalaxyZ(){
   const seen=new Set(),out=[];
   for(const d of rows){
     const cpf=digits(d.cpf),client=norm(d.cliente).toLowerCase();
-    const key=(cpf||client)+'|'+norm(d.data);
+    const product=norm(d.produto).toLowerCase();
+    const key=(cpf||client)+'|'+norm(d.data)+'|'+product;
     if(seen.has(key))continue;
     seen.add(key);out.push(d);
   }
@@ -59,5 +60,5 @@ const base=window.renderDashboard;
 window.renderDashboard=function(){if(typeof base==='function')base();refresh()};
 ['dashStart','dashEnd','dashConsultant','dashRefreshBtn'].forEach(id=>$(id)?.addEventListener(id==='dashRefreshBtn'?'click':'change',refresh));
 setTimeout(()=>window.renderDashboard(),0);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.10 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.11 ONLINE';
 })();
