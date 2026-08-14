@@ -27,13 +27,17 @@ function fmt(d){
   const parts=[d?.cliente,d?.produto,d?.capacidade,d?.cor].filter(Boolean);
   return parts.join(' • ');
 }
+function formSaveButtons(){
+  const scope=document.getElementById('formPanel')||document;
+  return [...scope.querySelectorAll('button')].filter(b=>/^\s*salvar(\s|$)/i.test(b.textContent||''));
+}
 function setSaveButtonBusy(on){
-  const candidates=[...document.querySelectorAll('button')].filter(b=>/salvar/i.test(b.textContent||''));
-  candidates.forEach(b=>{
-    if(on){b.dataset.prevDisabled=b.disabled?'1':'0';b.disabled=true;b.setAttribute('aria-busy','true')}
-    else{if(b.dataset.prevDisabled!=='1')b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.prevDisabled}
+  formSaveButtons().forEach(b=>{
+    if(on){b.dataset.prevDisabled=b.disabled?'1':'0';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent='Salvando...'}
+    else{if(b.dataset.prevDisabled!=='1')b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.prevDisabled;b.textContent='Salvar e imprimir'}
   });
 }
+function labelSaveButton(){formSaveButtons().forEach(b=>b.textContent='Salvar e imprimir')}
 function markChanged(e){
   if(!justSaved)return;
   if(e?.isTrusted===false)return;
@@ -41,6 +45,16 @@ function markChanged(e){
 }
 document.addEventListener('input',markChanged,true);
 document.addEventListener('change',markChanged,true);
+
+function printSaved(result){
+  try{
+    if(typeof renderDoc==='function')renderDoc(result);
+    setTimeout(()=>window.print(),120);
+  }catch(err){
+    console.error('Falha ao abrir impressão',err);
+    alert('A pré-venda foi salva, mas não foi possível abrir a tela de impressão. Você pode imprimir novamente pelo Histórico.');
+  }
+}
 
 const base=window.saveCurrent;
 if(typeof base!=='function')return;
@@ -50,7 +64,7 @@ window.saveCurrent=async function(){
     return null;
   }
   if(justSaved){
-    alert('Esta pré-venda já foi salva. Nenhum novo registro foi criado. Para cadastrar outra, altere os dados do formulário.');
+    alert('Esta pré-venda já foi salva. Nenhum novo registro foi criado. Para imprimir novamente, utilize o Histórico.');
     return lastSaved;
   }
 
@@ -77,6 +91,7 @@ window.saveCurrent=async function(){
     if(result){
       lastSaved=result;
       justSaved=true;
+      printSaved(result);
     }
     return result;
   }finally{
@@ -85,5 +100,7 @@ window.saveCurrent=async function(){
   }
 };
 
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.12 ONLINE';
+labelSaveButton();
+setTimeout(labelSaveButton,300);
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.13 ONLINE';
 })();
