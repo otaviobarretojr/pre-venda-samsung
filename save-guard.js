@@ -49,7 +49,7 @@ document.addEventListener('change',markChanged,true);
 function printSaved(result){
   try{
     if(typeof renderDoc==='function')renderDoc(result);
-    setTimeout(()=>window.print(),120);
+    window.print();
   }catch(err){
     console.error('Falha ao abrir impressão',err);
     alert('A pré-venda foi salva, mas não foi possível abrir a tela de impressão. Você pode imprimir novamente pelo Histórico.');
@@ -58,6 +58,12 @@ function printSaved(result){
 
 const base=window.saveCurrent;
 if(typeof base!=='function')return;
+window.afterLocalPreSaleSave=function(result){
+  if(!saving||!result)return;
+  lastSaved=result;
+  justSaved=true;
+  printSaved(result);
+};
 window.saveCurrent=async function(){
   if(saving){
     alert('Esta pré-venda já está sendo salva. Aguarde a conclusão.');
@@ -88,7 +94,7 @@ window.saveCurrent=async function(){
   setSaveButtonBusy(true);
   try{
     const result=await base.apply(this,arguments);
-    if(result){
+    if(result&&!justSaved){
       lastSaved=result;
       justSaved=true;
       printSaved(result);
@@ -102,5 +108,5 @@ window.saveCurrent=async function(){
 
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.13 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.14 ONLINE';
 })();
