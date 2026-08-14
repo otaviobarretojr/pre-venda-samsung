@@ -106,7 +106,9 @@ window.saveCurrent=async function(){
   }
 };
 
+const saveButton=document.getElementById('salvarBtn');
+if(saveButton)saveButton.onclick=window.saveCurrent;
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.16 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.17 ONLINE';
 })();
