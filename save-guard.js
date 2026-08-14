@@ -123,5 +123,5 @@ const baseStartNewSale=window.startNewSale;
 if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();return baseStartNewSale.apply(this,arguments)};
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.20 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.2.0 ONLINE';
 })();
