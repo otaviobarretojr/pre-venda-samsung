@@ -28,8 +28,10 @@ function fmt(d){
   return parts.join(' • ');
 }
 function formSaveButtons(){
+  const primary=document.getElementById('salvarBtn');
+  if(primary)return[primary];
   const scope=document.getElementById('formPanel')||document;
-  return [...scope.querySelectorAll('button')].filter(b=>/^\s*salvar(\s|$)/i.test(b.textContent||''));
+  return [...scope.querySelectorAll('button')].filter(b=>/^\s*salvar/i.test(b.textContent||''));
 }
 function setSaveButtonBusy(on){
   formSaveButtons().forEach(b=>{
@@ -121,5 +123,5 @@ const baseStartNewSale=window.startNewSale;
 if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();return baseStartNewSale.apply(this,arguments)};
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.19 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.1.20 ONLINE';
 })();
