@@ -3,6 +3,7 @@
 let saving=false;
 let justSaved=false;
 let lastSaved=null;
+let savingEdit=false;
 
 const norm=v=>String(v??'').trim();
 const digits=v=>norm(v).replace(/\D/g,'');
@@ -35,18 +36,21 @@ function formSaveButtons(){
 }
 function setSaveButtonBusy(on){
   formSaveButtons().forEach(b=>{
-    if(on){b.dataset.prevDisabled=b.disabled?'1':'0';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent='Salvando...'}
-    else{if(b.dataset.prevDisabled!=='1')b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.prevDisabled;b.textContent='Salvar e imprimir'}
+    if(on){b.dataset.prevDisabled=b.disabled?'1':'0';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent=savingEdit?'Salvando alteração...':'Salvando...'}
+    else{if(b.dataset.prevDisabled!=='1')b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.prevDisabled;labelSaveButton()}
   });
 }
-function labelSaveButton(){formSaveButtons().forEach(b=>b.textContent='Salvar e imprimir')}
+function labelSaveButton(){const editing=!!editingRecordId();formSaveButtons().forEach(b=>b.textContent=editing?'Salvar alteração':'Salvar e gerar PDF')}
+window.refreshPreSaleSaveLabel=labelSaveButton;
 function resetSaveState(){
   saving=false;
+  savingEdit=false;
   justSaved=false;
   lastSaved=null;
   setSaveButtonBusy(false);
   labelSaveButton();
 }
+window.preparePreSaleEdit=function(){saving=false;savingEdit=true;justSaved=false;lastSaved=null;setSaveButtonBusy(false);labelSaveButton();savingEdit=false};
 function markChanged(e){
   if(!justSaved)return;
   if(e?.isTrusted===false)return;
@@ -71,7 +75,7 @@ window.afterLocalPreSaleSave=function(result){
   if(!saving||!result)return;
   lastSaved=result;
   justSaved=true;
-  printSaved(result);
+  if(!savingEdit)printSaved(result);
 };
 window.saveCurrent=async function(){
   if(saving){
@@ -100,18 +104,20 @@ window.saveCurrent=async function(){
   }
 
   saving=true;
+  savingEdit=isEdit;
   setSaveButtonBusy(true);
   try{
     const result=await base.apply(this,arguments);
     if(result&&!justSaved){
       lastSaved=result;
       justSaved=true;
-      printSaved(result);
+      if(!savingEdit)printSaved(result);
     }
     return result;
   }finally{
     saving=false;
     setSaveButtonBusy(false);
+    savingEdit=false;
   }
 };
 
@@ -120,8 +126,8 @@ if(saveButton)saveButton.onclick=window.saveCurrent;
 const newButton=document.getElementById('novoBtn');
 if(newButton)newButton.addEventListener('click',resetSaveState,true);
 const baseStartNewSale=window.startNewSale;
-if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();return baseStartNewSale.apply(this,arguments)};
+if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();const r=baseStartNewSale.apply(this,arguments);labelSaveButton();return r};
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.4.0 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.6.2 ONLINE';
 })();
