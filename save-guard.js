@@ -40,7 +40,7 @@ function setSaveButtonBusy(on){
     else{if(b.dataset.prevDisabled!=='1')b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.prevDisabled;labelSaveButton()}
   });
 }
-function labelSaveButton(){const editing=!!editingRecordId();formSaveButtons().forEach(b=>b.textContent=editing?'Salvar alteração':'Salvar e gerar PDF')}
+function labelSaveButton(){const editing=!!editingRecordId();formSaveButtons().forEach(b=>b.textContent=editing?'Salvar alteração':'Salvar e imprimir')}
 window.refreshPreSaleSaveLabel=labelSaveButton;
 function resetSaveState(){
   saving=false;
@@ -129,5 +129,5 @@ const baseStartNewSale=window.startNewSale;
 if(typeof baseStartNewSale==='function')window.startNewSale=function(){resetSaveState();const r=baseStartNewSale.apply(this,arguments);labelSaveButton();return r};
 labelSaveButton();
 setTimeout(labelSaveButton,300);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.6.2 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.6.3 ONLINE';
 })();
