@@ -12,14 +12,16 @@ function recordValue(r){return Number(window.getPreSaleFinalValue?.(r)||r?.valor
 function device(){return localStorage.getItem('preVendaDeviceIdV1')||'Computador não identificado'}
 
 // Telefone compatível com a base atual: armazenado no campo técnico já existente.
-function ensurePhone(){if($('telefone'))return;const cpf=$('cpf')?.closest('.field');if(!cpf)return;const field=document.createElement('div');field.className='field';field.innerHTML='<label for="telefone">Contato do cliente *</label><input id="telefone" inputmode="tel" maxlength="15" placeholder="(92) 98151-9393"><div class="field-help">Informe o DDD e o número do WhatsApp.</div>';cpf.insertAdjacentElement('afterend',field);$('telefone').addEventListener('input',e=>e.target.value=maskPhone(e.target.value))}
+function ensurePhone(){if($('telefone'))return;const cpf=$('cpf')?.closest('.field');if(!cpf)return;const field=document.createElement('div');field.className='field';field.innerHTML='<label for="telefone">Contato do cliente *</label><input id="telefone" inputmode="tel" maxlength="15"><div class="field-help">Informe o DDD e o número do WhatsApp.</div>';cpf.insertAdjacentElement('afterend',field);$('telefone').addEventListener('input',e=>e.target.value=maskPhone(e.target.value))}
 ensurePhone();
 const collect0=window.collect;window.collect=function(){const d=collect0.apply(this,arguments);d.telefone=$('telefone')?.value.trim()||'';return d};
 const validate0=window.validate;window.validate=function(d){const base=validate0.apply(this,arguments);if(base)return base;const n=digits(d.telefone);if(n.length!==10&&n.length!==11)return'Informe o contato do cliente com DDD.';return''};
 const toDb0=window.toDb;window.toDb=function(d){const r=toDb0.apply(this,arguments),raw=cleanMarker(r.obs_interna,PHONE);r.obs_interna=[raw,d.telefone?`[[${PHONE}:${digits(d.telefone)}]]`:''].filter(Boolean).join('\n');return r};
 const fromDb0=window.fromDb;window.fromDb=function(r){const d=fromDb0.apply(this,arguments),phone=marker(r.obs_interna,PHONE);d.telefone=phone?maskPhone(phone):'';d.obsInterna=cleanMarker(d.obsInterna,PHONE);return d};
 const clear0=window.clearForm;window.clearForm=function(){const r=clear0.apply(this,arguments);ensurePhone();if($('telefone'))$('telefone').value='';return r};
-const load0=window.loadRecord;window.loadRecord=async function(id){const r=await load0.apply(this,arguments),d=getHistory().find(x=>x.id===id);ensurePhone();if($('telefone'))$('telefone').value=maskPhone(d?.telefone||'');return r};
+function selectValue(id,value,placeholder){const el=$(id);if(!el)return;if(value&&!Array.from(el.options).some(x=>x.value===value))el.insertAdjacentHTML('beforeend',`<option>${esc(value)}</option>`);el.value=value||'';if(value&&el.value!==value){el.innerHTML+=`<option value="${esc(value)}">${esc(value)}</option>`;el.value=value}if(!value&&placeholder&&el.options.length)el.options[0].textContent=placeholder}
+function restoreEditFields(d){if(!d)return;ensurePhone();if($('telefone'))$('telefone').value=maskPhone(d.telefone||'');populateProducts(d.produto||'');selectValue('produto',d.produto);onProductChange();selectValue('capacidade',d.capacidade);selectValue('cor',d.cor);populateConsultants(d.vendedor||'');selectValue('vendedor',d.vendedor);selectValue('preregistro',d.preregistro);selectValue('trocafone',d.trocafone);if($('wearable')){selectValue('wearable',d.wearable);$('wearable').dispatchEvent(new Event('change'));selectValue('wearableColor',d.wearableColor)}}
+const load0=window.loadRecord;window.loadRecord=async function(id){const r=await load0.apply(this,arguments),d=getHistory().find(x=>x.id===id);restoreEditFields(d);setTimeout(()=>restoreEditFields(d),0);setTimeout(()=>restoreEditFields(d),40);return r};
 const doc0=window.renderDoc;window.renderDoc=function(d){const r=doc0.apply(this,arguments);let phone=$('docTelefone');if(!phone){const cpf=$('docCpf')?.closest('.pv-row');if(cpf){const row=document.createElement('div');row.className='pv-row';row.innerHTML='<div class="pv-label">Contato</div><div class="pv-value" id="docTelefone">—</div>';cpf.insertAdjacentElement('afterend',row);phone=$('docTelefone')}}if(phone)phone.textContent=d.telefone||'—';return r};
 
 function goals(){return parse(GOALS_KEY)||{sales:0,revenue:0,pre:0,trade:0,eco:0,consultants:{}}}
@@ -73,5 +75,5 @@ const style=document.createElement('style');style.textContent=`.management-wide{
 
 ensureManagement();addReportButton();dashboardManager();decorateHistorySoon();loadRemoteManagement();
 const switch0=window.switchTab;window.switchTab=function(id){const r=switch0.apply(this,arguments);if(id==='settingsPanel'){ensureManagement();renderManagement();renderRecycle()}if(id==='dashboardPanel'){addReportButton();dashboardManager()}return r};
-const footer=document.querySelector('.footer-note');if(footer)footer.textContent='PRE VENDA • v5.6.0 ONLINE';
+const footer=document.querySelector('.footer-note');if(footer)footer.textContent='PRE VENDA • v5.6.1 ONLINE';
 })();
