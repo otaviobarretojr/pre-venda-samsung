@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pre-venda-samsung-v5-6-3';
+const CACHE_NAME = 'pre-venda-samsung-v5-6-4';
 const APP_SHELL = [
   './',
   './index.html',
