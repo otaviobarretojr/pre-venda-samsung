@@ -76,5 +76,5 @@ const style=document.createElement('style');style.textContent=`.management-wide{
 if($('imprimirBtn'))$('imprimirBtn').textContent='Gerar PDF';
 ensureManagement();addReportButton();dashboardManager();decorateHistorySoon();loadRemoteManagement();window.refreshPreSaleSaveLabel?.();
 const switch0=window.switchTab;window.switchTab=function(id){const r=switch0.apply(this,arguments);if(id==='settingsPanel'){ensureManagement();renderManagement();renderRecycle()}if(id==='dashboardPanel'){addReportButton();dashboardManager()}return r};
-const footer=document.querySelector('.footer-note');if(footer)footer.textContent='PRE VENDA • v5.6.2 ONLINE';
+const footer=document.querySelector('.footer-note');if(footer)footer.textContent='PRE VENDA • v5.6.3 ONLINE';
 })();
