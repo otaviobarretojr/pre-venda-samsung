@@ -3,6 +3,7 @@
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let activeTab='overview';
+let selectedProducts=new Set();
 
 function isGalaxyZ(name){return/galaxy\s*z\s*(flip|fold)/i.test(String(name||''))}
 function uniqueById(rows){const seen=new Set();return rows.filter(x=>{const k=x?.id||crypto.randomUUID();if(seen.has(k))return false;seen.add(k);return true})}
@@ -16,11 +17,14 @@ function group(rows,key){const out={};for(const x of rows){const k=key(x);if(k)o
 function ensure(){
   const card=$('dashboardPanel')?.querySelector('.card');if(!card)return null;
   $('dashProductMulti')?.style.setProperty('display','none','important');
-  let product=$('dashCleanProduct');
+  let product=$('dashCleanProductMulti');
   if(!product){
-    product=document.createElement('select');product.id='dashCleanProduct';product.innerHTML='<option value="">Todos os aparelhos</option>';
+    product=document.createElement('div');product.id='dashCleanProductMulti';product.className='dash-clean-product-multi';
+    product.innerHTML='<button type="button" id="dashCleanProductBtn" class="dash-clean-product-btn">Todos os produtos</button><div id="dashCleanProductMenu" class="dash-clean-product-menu" hidden><div class="dash-clean-product-head"><strong>Selecionar produtos</strong><button type="button" id="dashCleanProductAll">Todos</button></div><div id="dashCleanProductChecks"></div></div>';
     const refresh=$('dashRefreshBtn');refresh?.parentNode?.insertBefore(product,refresh);
-    product.addEventListener('change',()=>window.renderDashboard());
+    $('dashCleanProductBtn').onclick=e=>{e.stopPropagation();$('dashCleanProductMenu').hidden=!$('dashCleanProductMenu').hidden};
+    $('dashCleanProductAll').onclick=()=>{selectedProducts.clear();renderClean()};
+    document.addEventListener('click',e=>{if(!product.contains(e.target))$('dashCleanProductMenu').hidden=true});
   }
   let root=$('dashCleanRoot');
   if(!root){
@@ -31,19 +35,24 @@ function ensure(){
   }
   return root;
 }
-function filters(){return{start:$('dashStart')?.value||'',end:$('dashEnd')?.value||'',consultant:$('dashConsultant')?.value||'',product:$('dashCleanProduct')?.value||''}}
-function allRows(){return uniqueById(getHistory().filter(x=>isGalaxyZ(x.produto)))}
+function filters(){return{start:$('dashStart')?.value||'',end:$('dashEnd')?.value||'',consultant:$('dashConsultant')?.value||''}}
+function allRows(){return uniqueById(getHistory().filter(x=>String(x.produto||'').trim()))}
 function refreshOptions(rows){
-  const consultant=$('dashConsultant'),product=$('dashCleanProduct');
-  const cv=consultant?.value||'',pv=product?.value||'';
+  const consultant=$('dashConsultant'),cv=consultant?.value||'';
   const consultants=[...new Set(rows.map(x=>x.vendedor).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const products=[...new Set(rows.map(x=>x.produto).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   if(consultant){consultant.innerHTML='<option value="">Todos os consultores</option>'+consultants.map(x=>`<option>${esc(x)}</option>`).join('');if(consultants.includes(cv))consultant.value=cv}
-  if(product){product.innerHTML='<option value="">Todos os aparelhos</option>'+products.map(x=>`<option>${esc(x)}</option>`).join('');if(products.includes(pv))product.value=pv}
+  for(const name of [...selectedProducts])if(!products.includes(name))selectedProducts.delete(name);
+  const checks=$('dashCleanProductChecks');
+  if(checks){
+    checks.innerHTML=products.map(name=>`<label class="dash-clean-product-option"><input type="checkbox" data-product="${esc(name)}" ${selectedProducts.has(name)?'checked':''}><span>${esc(name)}</span></label>`).join('')||'<div class="dash-clean-empty">Nenhum produto encontrado.</div>';
+    checks.querySelectorAll('input').forEach(input=>input.onchange=()=>{input.checked?selectedProducts.add(input.dataset.product):selectedProducts.delete(input.dataset.product);renderClean()});
+  }
+  const button=$('dashCleanProductBtn');if(button)button.textContent=!selectedProducts.size?'Todos os produtos':selectedProducts.size===1?[...selectedProducts][0]:`${selectedProducts.size} produtos selecionados`;
 }
 function data(){
   const rows=allRows();refreshOptions(rows);const f=filters();
-  return rows.filter(x=>(!f.start||x.data>=f.start)&&(!f.end||x.data<=f.end)&&(!f.consultant||x.vendedor===f.consultant)&&(!f.product||x.produto===f.product));
+  return rows.filter(x=>(!f.start||x.data>=f.start)&&(!f.end||x.data<=f.end)&&(!f.consultant||x.vendedor===f.consultant)&&(!selectedProducts.size||selectedProducts.has(x.produto)));
 }
 function kpi(label,value,note=''){return`<div class="dash-clean-kpi"><span>${esc(label)}</span><strong>${esc(value)}</strong>${note?`<small>${esc(note)}</small>`:''}</div>`}
 function renderOverview(rows){
@@ -91,12 +100,13 @@ const style=document.createElement('style');style.textContent=`
 #dashboardPanel .card>.dashboard-grid,#dashboardPanel .card>.dash-section,#dashV5,#dashOpsV51{display:none!important}
 #dashboardPanel .toolbar{padding:12px;background:#f8fafc;border:1px solid #e4e7ec;border-radius:14px;margin-bottom:14px}
 #dashboardPanel .toolbar input,#dashboardPanel .toolbar select{min-width:155px;flex:1}
+.dash-clean-product-multi{position:relative;min-width:220px;flex:1}.dash-clean-product-btn{width:100%;min-height:46px;padding:10px 12px;border:1px solid #d9dfeb;border-radius:12px;background:#fff;color:#344054;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dash-clean-product-menu{position:absolute;z-index:140;top:50px;left:0;width:360px;max-width:90vw;max-height:340px;overflow:auto;background:#fff;border:1px solid #d0d5dd;border-radius:14px;box-shadow:0 16px 38px rgba(16,24,40,.18);padding:9px}.dash-clean-product-head{position:sticky;top:-9px;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:8px;background:#fff;border-bottom:1px solid #eaecf0}.dash-clean-product-head button{padding:4px 6px;background:transparent;color:#1428A0}.dash-clean-product-option{display:flex;gap:10px;align-items:center;padding:10px 8px;border-radius:9px;font-size:12px;cursor:pointer}.dash-clean-product-option:hover{background:#f5f7fb}.dash-clean-product-option input{width:16px;height:16px;accent-color:#1428A0}
 .dash-clean-tabs{display:inline-flex;gap:4px;padding:4px;background:#eef2f6;border-radius:12px;margin:2px 0 16px}.dash-clean-tabs button{padding:9px 14px;background:transparent;color:#475467}.dash-clean-tabs button.active{background:#fff;color:#1428A0;box-shadow:0 1px 4px rgba(16,24,40,.12)}
 .dash-clean-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.dash-clean-kpis-two{grid-template-columns:repeat(2,1fr)}.dash-clean-kpi{padding:16px;background:#fff;border:1px solid #e4e7ec;border-radius:14px}.dash-clean-kpi span{display:block;font-size:12px;color:#667085}.dash-clean-kpi strong{display:block;margin-top:6px;font-size:25px;color:#101828}.dash-clean-kpi small{color:#98a2b3;font-size:11px}
 .dash-clean-panel,.dash-clean-details{background:#fff;border:1px solid #e4e7ec;border-radius:16px;padding:17px}.dash-clean-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}.dash-clean-heading span{font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#1428A0}.dash-clean-heading h3{margin:3px 0 0;font-size:17px}.dash-clean-heading small{color:#667085}
 .dash-clean-bar{display:grid;grid-template-columns:24px minmax(130px,1.3fr) minmax(100px,2fr) 35px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:13px}.dash-clean-bar:last-child{border-bottom:0}.dash-clean-rank{width:22px;height:22px;display:grid;place-items:center;border-radius:7px;background:#eef2ff;color:#1428A0;font-size:11px;font-weight:900}.dash-clean-label{font-weight:700}.dash-clean-track{height:8px;background:#eef2f6;border-radius:999px;overflow:hidden}.dash-clean-track i{display:block;height:100%;background:#1428A0;border-radius:999px}.dash-clean-bar strong{text-align:right}.dash-clean-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.dash-clean-details{margin-top:14px}.dash-clean-details summary{cursor:pointer;font-weight:800;color:#344054}.dash-clean-details>div{margin-top:12px}.dash-clean-empty{padding:24px;text-align:center;color:#98a2b3}.dash-clean-warning{padding:11px 13px;margin-bottom:12px;border-radius:10px;background:#fffaeb;color:#b54708;font-size:13px}
 .dash-product-accordion{border-bottom:1px solid #eaecf0}.dash-product-accordion:last-child{border-bottom:0}.dash-product-expand{width:100%;display:grid;grid-template-columns:24px minmax(170px,1.4fr) minmax(100px,2fr) 35px 22px;gap:10px;align-items:center;padding:11px 0;background:transparent;color:#101828;text-align:left}.dash-product-name{font-weight:800}.dash-product-name small{display:block;margin-top:3px;color:#98a2b3;font-size:10px;font-weight:500}.dash-product-expand>strong{text-align:right}.dash-product-chevron{font-size:20px;color:#667085;transition:transform .15s}.dash-product-expand[aria-expanded="true"] .dash-product-chevron{transform:rotate(180deg)}.dash-product-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 12px 34px;padding:14px;background:#f8fafc;border-radius:12px}.dash-product-breakdown h4{margin:0 0 10px;font-size:12px;color:#344054}.dash-product-mini{display:grid;grid-template-columns:minmax(90px,1fr) minmax(60px,1.3fr) 28px;gap:8px;align-items:center;padding:5px 0;font-size:11px}.dash-product-mini>i{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden}.dash-product-mini>i b{display:block;height:100%;background:#1428A0;border-radius:999px}.dash-product-mini>strong{text-align:right}
-@media(max-width:760px){.dash-clean-kpis,.dash-clean-kpis-two,.dash-clean-two{grid-template-columns:1fr 1fr}.dash-clean-tabs{display:grid;grid-template-columns:repeat(3,1fr);width:100%}.dash-clean-tabs button{padding:9px 5px;font-size:11px}.dash-clean-bar{grid-template-columns:24px minmax(110px,1fr) 35px}.dash-clean-track{display:none}.dash-clean-two{grid-template-columns:1fr}.dash-clean-kpi strong{font-size:22px}.dash-product-expand{grid-template-columns:24px minmax(130px,1fr) 32px 20px}.dash-product-expand>.dash-clean-track{display:none}.dash-product-breakdown{grid-template-columns:1fr;margin-left:0}.dash-clean-heading>small{display:none}}
+@media(max-width:760px){.dash-clean-kpis,.dash-clean-kpis-two,.dash-clean-two{grid-template-columns:1fr 1fr}.dash-clean-tabs{display:grid;grid-template-columns:repeat(3,1fr);width:100%}.dash-clean-tabs button{padding:9px 5px;font-size:11px}.dash-clean-bar{grid-template-columns:24px minmax(110px,1fr) 35px}.dash-clean-track{display:none}.dash-clean-two{grid-template-columns:1fr}.dash-clean-kpi strong{font-size:22px}.dash-product-expand{grid-template-columns:24px minmax(130px,1fr) 32px 20px}.dash-product-expand>.dash-clean-track{display:none}.dash-product-breakdown{grid-template-columns:1fr;margin-left:0}.dash-clean-heading>small{display:none}.dash-clean-product-multi{width:100%;min-width:0}.dash-clean-product-menu{position:fixed;left:10px;right:10px;top:auto;bottom:76px;width:auto;max-width:none;max-height:58vh}}
 `;document.head.appendChild(style);
-const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.2.1 ONLINE';
+const f=document.querySelector('.footer-note');if(f)f.textContent='PRE VENDA • v5.2.2 ONLINE';
 })();
