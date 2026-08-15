@@ -36,5 +36,5 @@ grant select, insert, update, delete on public.app_settings to anon;
 insert into public.app_settings (key, value)
 values
   ('consultants', '[{"id":"c1","name":"Cristina Simão","active":true},{"id":"c2","name":"Randerson Bastos","active":true},{"id":"c3","name":"Shelda Sofia","active":true},{"id":"c4","name":"Davi Amâncio","active":true},{"id":"c5","name":"Aline Morais","active":true},{"id":"c6","name":"Ricardo Pinto","active":true},{"id":"c7","name":"Luiza Sousa","active":true}]'::jsonb),
-  ('catalog', '[{"id":"p1","name":"Galaxy Z Flip 8","capacities":["256GB","512GB"],"colors":["Rosa","Preto","Branco"]},{"id":"p2","name":"Galaxy Z Fold 8","capacities":["256GB","512GB"],"colors":["Lavanda","Preto","Branco"]},{"id":"p3","name":"Galaxy Z Fold 8 Ultra","capacities":["512GB"],"colors":["Roxo","Preto","Branco"]}]'::jsonb)
+  ('catalog', '[{"id":"p1","name":"Galaxy Z Flip 8","capacities":["256GB","512GB"],"colors":["Rosa","Preto","Branco"]},{"id":"p2","name":"Galaxy Z Fold 8","capacities":["256GB","512GB"],"colors":["Lavanda","Preto","Branco"]},{"id":"p3","name":"Galaxy Z Fold 8 Ultra","capacities":["512GB","1TB"],"colors":["Roxo","Preto","Branco"]}]'::jsonb)
 on conflict (key) do nothing;
