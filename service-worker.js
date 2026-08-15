@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pre-venda-samsung-v5-4-0';
+const CACHE_NAME = 'pre-venda-samsung-v5-6-0';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const APP_SHELL = [
   './stability-v520.js',
   './dashboard-clean-v520.js',
   './professional-v540.js',
+  './management-v560.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
