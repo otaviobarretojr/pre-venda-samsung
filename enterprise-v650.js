@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.3';
+const VERSION='6.5.4';
 const $=id=>document.getElementById(id);
 const AUDIT_KEY='preVendaEnterpriseAuditV650';
 const CATALOG_BACKUP_KEY='preVendaCatalogSnapshotsV650';
@@ -193,7 +193,7 @@ body.enterprise-mode .content{max-width:1500px;margin:0 auto}body.enterprise-mod
 @media print{.enterprise-sidebar,.enterprise-header{display:none!important}body.enterprise-mode .app{padding:0!important}}
 `;document.head.appendChild(css);
 
-buildShell();installWrappers();renderCockpit();ensureHistoryTools();ensureCatalogSafety();ensureAudit();renderCatalogSafety();renderAudit();updateConnection();
+buildShell();installWrappers();renderCockpit();ensureHistoryTools();ensureCatalogSafety();ensureAudit();renderCatalogSafety();renderAudit();updateConnection();window.renderDashboard?.();
 window.addEventListener('online',()=>{updateConnection();audit('Conexão restabelecida')});
 window.addEventListener('offline',()=>{updateConnection();audit('Modo offline ativado')});
 window.addEventListener('storage',event=>{if(event.key===AUDIT_KEY)renderAudit();if(event.key===CATALOG_BACKUP_KEY)renderCatalogSafety()});
