@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.0';
+const VERSION='6.5.1';
 const $=id=>document.getElementById(id);
 const AUDIT_KEY='preVendaEnterpriseAuditV650';
 const CATALOG_BACKUP_KEY='preVendaCatalogSnapshotsV650';
@@ -162,6 +162,8 @@ function ensureAudit(){
 }
 
 function installWrappers(){
+ const renderHistory0=window.renderHistory;if(typeof renderHistory0==='function'){window.renderHistory=function(){const provider=window.getFilteredHistoryView;const filtered=typeof provider==='function'?provider():null;if(!Array.isArray(filtered)){const result=renderHistory0.apply(this,arguments);window.refreshHistoryProductFilters?.();ensureHistoryTools();return result}const oldGet=window.getHistory;window.getHistory=()=>filtered;try{return renderHistory0.apply(this,arguments)}finally{window.getHistory=oldGet;window.refreshHistoryProductFilters?.();ensureHistoryTools()}}}
+ const export0=window.exportCSV;if(typeof export0==='function'){window.exportCSV=function(){const provider=window.getFilteredHistoryView,filtered=typeof provider==='function'?provider():getHistory();if(!filtered.length)return alert('Nenhuma pré-venda encontrada com os filtros selecionados.');const oldGet=window.getHistory;window.getHistory=()=>filtered;try{audit('Histórico exportado',`${filtered.length} registro(s)`);return export0.apply(this,arguments)}finally{window.getHistory=oldGet}};if($('exportarBtn'))$('exportarBtn').onclick=window.exportCSV}
  const switch0=window.switchTab;window.switchTab=function(id){const result=switch0.apply(this,arguments);updateShell(id);if(id==='homePanel')renderCockpit();if(id==='historyPanel')setTimeout(ensureHistoryTools,0);if(id==='settingsPanel')setTimeout(()=>{ensureCatalogSafety();ensureAudit();renderCatalogSafety();renderAudit()},0);return result};
  const metrics0=window.updateMetrics;window.updateMetrics=function(){const result=metrics0?.apply(this,arguments);renderCockpit();return result};
  const sync0=window.syncAll;if(typeof sync0==='function'){window.syncAll=async function(){updateConnection('busy');audit('Sincronização iniciada');try{const result=await sync0.apply(this,arguments);localStorage.setItem(LAST_SYNC_KEY,iso());updateConnection('online');audit('Sincronização concluída');return result}catch(error){updateConnection('error');audit('Falha na sincronização',error?.message||'Erro não informado');throw error}}}
