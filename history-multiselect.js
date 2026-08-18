@@ -8,6 +8,9 @@ function ensure(){const old=$('histProduct');if(!old||$('histProductMulti'))retu
 function renderChecks(){ensure();const wrap=$('histProductChecks');if(!wrap)return;const list=products();for(const x of [...selected])if(!list.includes(x))selected.delete(x);wrap.innerHTML=list.map(p=>`<label class="hist-multi-option"><input type="checkbox" data-product="${esc(p)}" ${selected.has(p)?'checked':''}><span>${esc(p)}</span></label>`).join('')||'<div class="hist-multi-empty">Nenhum produto no histórico.</div>';wrap.querySelectorAll('input').forEach(i=>i.onchange=()=>{i.checked?selected.add(i.dataset.product):selected.delete(i.dataset.product);updateLabel();renderHistory()});updateLabel()}
 function updateLabel(){const b=$('histProductMultiBtn');if(!b)return;b.textContent=!selected.size?'Todos os produtos':selected.size===1?[...selected][0]:`${selected.size} produtos selecionados`}
 function selectedProducts(){return [...selected]}
+window.getFilteredHistoryView=()=>applyFullFilter();
+window.getSelectedHistoryProducts=selectedProducts;
+window.refreshHistoryProductFilters=renderChecks;
 function applyFullFilter(){const q=$('busca')?.value.trim().toLowerCase()||'',s=$('histStart')?.value||'',e=$('histEnd')?.value||'',c=$('histConsultant')?.value||'',st=$('histStatus')?.value||'',eco=$('histEco')?.value||'',sp=selectedProducts();return getHistory().filter(d=>(!q||[d.cliente,d.cpf,d.produto,d.capacidade,d.cor,d.wearable,d.wearableColor,d.vendedor,d.statusVenda].some(v=>String(v||'').toLowerCase().includes(q)))&&(!s||d.data>=s)&&(!e||d.data<=e)&&(!c||d.vendedor===c)&&(!sp.length||sp.includes(d.produto))&&(!st||(d.statusVenda||'Aguardando produto')===st)&&(!eco||(eco==='com'?!!d.wearable:!d.wearable)))}
 const newestFirst=(a,b)=>{const date=String(b?.data||'').localeCompare(String(a?.data||''));if(date)return date;return String(b?.updatedAt||b?.updated_at||'').localeCompare(String(a?.updatedAt||a?.updated_at||''))};
 const export0=window.exportCSV;
