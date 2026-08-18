@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.4';
+const VERSION='6.5.5';
 const $=id=>document.getElementById(id);
 const AUDIT_KEY='preVendaEnterpriseAuditV650';
 const CATALOG_BACKUP_KEY='preVendaCatalogSnapshotsV650';
