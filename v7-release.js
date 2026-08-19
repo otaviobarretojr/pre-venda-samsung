@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const RELEASE='7.0.0-rc2';
-const CACHE_EPOCH='v7-watches2';
+const RELEASE='7.0.0';
+const CACHE_EPOCH='v7-stable-1';
 window.PRE_SALE_RELEASE=RELEASE;
 window.PRE_SALE_CACHE_EPOCH=CACHE_EPOCH;
 document.documentElement.dataset.preSaleRelease=RELEASE;
