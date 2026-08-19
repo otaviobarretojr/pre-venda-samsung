@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.7';
+const VERSION='6.5.8';
 const $=id=>document.getElementById(id);
 const AUDIT_KEY='preVendaEnterpriseAuditV650';
 const CATALOG_BACKUP_KEY='preVendaCatalogSnapshotsV650';
@@ -199,6 +199,7 @@ window.addEventListener('online',()=>{updateConnection();audit('Conexão restabe
 window.addEventListener('offline',()=>{updateConnection();audit('Modo offline ativado')});
 window.addEventListener('storage',event=>{if(event.key===AUDIT_KEY)renderAudit();if(event.key===CATALOG_BACKUP_KEY)renderCatalogSafety()});
 setInterval(()=>{updateConnection();renderCockpit()},60000);
-const footer=document.querySelector('.footer-note');if(footer)footer.textContent=`PRE VENDA • v${VERSION} ENTERPRISE`;
+const footer=document.querySelector('.footer-note');
+if(footer){const versionLabel=`PRE VENDA • v${VERSION} ENTERPRISE`,keepLatestVersion=()=>{if(footer.textContent!==versionLabel)footer.textContent=versionLabel};keepLatestVersion();new MutationObserver(keepLatestVersion).observe(footer,{childList:true,subtree:true,characterData:true})}
 audit('Camada empresarial carregada',`v${VERSION}`);
 })();

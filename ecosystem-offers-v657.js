@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.7';
+const VERSION='6.5.8';
 const money=value=>typeof value==='number'?value.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}):'—';
 const sections=[
  {id:'smartphone',title:'Bundle com Smartphone',subtitle:'Modelos válidos para qualquer cor.',columns:['S26 Ultra','Z Fold 7','S26+ / S26','S25 Edge','Z Flip 7','FE Family','A57','A37','A17 (5G/LTE)'],rows:[
