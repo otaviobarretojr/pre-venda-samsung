@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='6.5.6';
+const VERSION='6.5.7';
 const $=id=>document.getElementById(id);
 const AUDIT_KEY='preVendaEnterpriseAuditV650';
 const CATALOG_BACKUP_KEY='preVendaCatalogSnapshotsV650';
@@ -33,6 +33,7 @@ const NAV=[
  ['homePanel','Visão geral','▦'],
  ['formPanel','Nova pré-venda','＋'],
  ['budgetPanel','Novo orçamento','▤'],
+ ['ecosystemOffersPanel','Ecossistema','◈'],
  ['historyPanel','Histórico','◫'],
  ['dashboardPanel','Relatórios','▥'],
  ['settingsPanel','Configurações','⚙']
