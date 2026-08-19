@@ -12,6 +12,8 @@ const applyIdentity=()=>{
   const title='Pré-Venda Samsung • v'+RELEASE;
   if(document.title!==title)document.title=title;
   setText(document.querySelector('.footer-note'),'PRÉ-VENDA SAMSUNG • v'+RELEASE.toUpperCase()+' • PREVIEW');
+  // Enterprise shell created by enterprise-v650 uses .ent-sidebar-foot > span.
+  setText(document.querySelector('#enterpriseSidebar .ent-sidebar-foot span'),'v'+RELEASE);
   setText(document.querySelector('.enterprise-sidebar-footer small, .sidebar-footer small, [data-system-version]'),'v'+RELEASE);
 };
 const scheduleIdentity=()=>{
@@ -23,10 +25,8 @@ applyIdentity();
 const root=document.body||document.documentElement;
 if(root)new MutationObserver(scheduleIdentity).observe(root,{childList:true,subtree:true});
 window.addEventListener('load',scheduleIdentity,{once:true});
-// Release the startup veil only after the current script stack and first paint settle.
-setTimeout(()=>{
-  applyIdentity();
-  window.preSaleReleaseBoot?.();
-},0);
+setTimeout(()=>{applyIdentity();window.preSaleReleaseBoot?.();},0);
+setTimeout(applyIdentity,250);
+setTimeout(applyIdentity,1000);
 console.info('[Pré-Venda Samsung] release',RELEASE,'loaded');
 })();
