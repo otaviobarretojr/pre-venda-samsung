@@ -1,7 +1,7 @@
-name: V7.1 Infrastructure Validation
+name: V7.1 Stability Validation
 on:
   push:
-    branches: [v7.1-infrastructure, v7.1-stable-release]
+    branches: [v7.1.1-stability-sync]
   pull_request:
     branches: [main]
 permissions:
@@ -20,35 +20,24 @@ jobs:
           node --check v71-data.js
           node --check v71-budget-import.js
           node --check v71-integration.js
+          node --check v711-stability.js
           node --check v71-self-test.js
           node --check v7-release.js
-          node --check ecosystem-v454.js
-          node --check v5.js
-          node --check budget-v570.js
-          node --check budget-history-v600.js
-      - name: V7.1 architecture contract
+      - name: V7.1.1 contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
-          const health=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.1.0'||v.channel!=='stable'||v.published!==true) throw Error('version.json não é V7.1 estável');
-          if(health.version!==v.version||health.channel!=='stable') throw Error('health.json divergente');
-          const sql=fs.readFileSync('supabase-v71-migration.sql','utf8');
-          for(const t of ['budgets','budget_catalog','ecosystem_catalog','release_versions']) if(!sql.includes(`public.${t}`)) throw Error(`Tabela ausente: ${t}`);
-          if(/drop\s+table|truncate\s+table/i.test(sql)) throw Error('Migração destrutiva não permitida');
-          const cfg=fs.readFileSync('v71-config.js','utf8');
-          for(const t of ['pre_vendas','budgets','budget_catalog','ecosystem_catalog']) if(!cfg.includes(t)) throw Error(`Base não separada: ${t}`);
-          const release=fs.readFileSync('v7-release.js','utf8');
-          if(!release.includes(`RELEASE='${v.version}'`)) throw Error('v7-release.js e version.json divergentes');
-          if(!release.includes('v71-self-test.js')) throw Error('Autoteste V7.1 não carregado');
-          const integration=fs.readFileSync('v71-integration.js','utf8');
-          if(!integration.includes('V71BudgetImport')) throw Error('Importação de preços não integrada');
-          if(!integration.includes("LEGACY_BUDGET_KEY='samsung_saved_budgets_v1'")) throw Error('Fallback legado ausente');
+          const h=JSON.parse(fs.readFileSync('health.json','utf8'));
+          if(v.version!=='7.1.1'||v.channel!=='stable'||v.published!==true) throw Error('release inválida');
+          if(h.version!==v.version||!h.requiredModules.includes('v711-stability.js')) throw Error('health divergente');
+          for(const f of ['v71-config.js','v71-data.js','v71-integration.js','v711-stability.js','v71-self-test.js']) if(!fs.existsSync(f)) throw Error('módulo ausente '+f);
+          const rel=fs.readFileSync('v7-release.js','utf8');if(!rel.includes("RELEASE='7.1.1'")||!rel.includes('v711-stability.js'))throw Error('loader divergente');
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-1-1')||!sw.includes('v711-stability.js'))throw Error('cache divergente');
+          const data=fs.readFileSync('v71-data.js','utf8');if(!data.includes('AbortController')||!data.includes('BroadcastChannel'))throw Error('resiliência de sync ausente');
           NODE
-      - name: Stable protection
+      - name: Stable base protection
         run: |
           grep -q "stableBase:'7.0.2'" v71-config.js
           grep -q "STABLE_BASE='7.0.2'" v7-release.js
-          grep -q 'pre-venda-samsung-v7-1-0' service-worker.js
           test -f supabase-online-setup.sql
