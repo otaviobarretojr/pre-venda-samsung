@@ -1,0 +1,62 @@
+name: Deploy Pré-Venda Samsung
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V7.1 release
+        run: |
+          node --check v71-config.js
+          node --check v71-data.js
+          node --check v71-budget-import.js
+          node --check v71-integration.js
+          node --check v71-self-test.js
+          node --check v7-release.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const v=JSON.parse(fs.readFileSync('version.json','utf8'));
+          const h=JSON.parse(fs.readFileSync('health.json','utf8'));
+          if(v.version!=='7.1.0-rc.1') throw new Error(`Versão inesperada: ${v.version}`);
+          if(h.version!==v.version) throw new Error('health/version divergentes');
+          if(v.stableBase!=='7.0.2') throw new Error('stableBase divergente');
+          console.log('Release validada:',v.version);
+          NODE
+
+  deploy:
+    needs: validate
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.'
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
