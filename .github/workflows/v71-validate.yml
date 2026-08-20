@@ -20,6 +20,7 @@ jobs:
           node --check v71-data.js
           node --check v71-budget-import.js
           node --check v71-integration.js
+          node --check v71-self-test.js
           node --check v7-release.js
           node --check ecosystem-v454.js
           node --check v5.js
@@ -30,7 +31,9 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
-          if(!String(v.version).startsWith('7.1.')) throw Error('version.json não é V7.1');
+          const health=JSON.parse(fs.readFileSync('health.json','utf8'));
+          if(v.version!=='7.1.0-rc.1') throw Error('version.json não é RC.1');
+          if(health.version!==v.version) throw Error('health.json divergente');
           const sql=fs.readFileSync('supabase-v71-migration.sql','utf8');
           for(const t of ['budgets','budget_catalog','ecosystem_catalog','release_versions']) if(!sql.includes(`public.${t}`)) throw Error(`Tabela ausente: ${t}`);
           if(/drop\s+table|truncate\s+table/i.test(sql)) throw Error('Migração destrutiva não permitida');
@@ -38,10 +41,11 @@ jobs:
           for(const t of ['pre_vendas','budgets','budget_catalog','ecosystem_catalog']) if(!cfg.includes(t)) throw Error(`Base não separada: ${t}`);
           const release=fs.readFileSync('v7-release.js','utf8');
           if(!release.includes(`RELEASE='${v.version}'`)) throw Error('v7-release.js e version.json estão divergentes');
+          if(!release.includes('v71-self-test.js')) throw Error('Autoteste V7.1 não carregado');
           const integration=fs.readFileSync('v71-integration.js','utf8');
           if(!integration.includes('V71BudgetImport')) throw Error('Importação de preços do Orçamento não integrada');
           if(!integration.includes("LEGACY_BUDGET_KEY='samsung_saved_budgets_v1'")) throw Error('Migração de orçamentos legados ausente');
-          console.log('V7.1 contract OK',v.version);
+          console.log('V7.1 RC contract OK',v.version);
           NODE
       - name: Stable base protection
         run: |
@@ -50,6 +54,8 @@ jobs:
           test -f supabase-online-setup.sql
       - name: Service worker contract
         run: |
-          grep -q 'pre-venda-samsung-v7-1-infra-2' service-worker.js
+          grep -q 'pre-venda-samsung-v7-1-rc-1' service-worker.js
           grep -q './v71-integration.js' service-worker.js
+          grep -q './v71-self-test.js' service-worker.js
           grep -q './version.json' service-worker.js
+          grep -q './health.json' service-worker.js
