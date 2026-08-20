@@ -1,0 +1,19 @@
+{
+  "version": "7.1.0-rc.1",
+  "stableBase": "7.0.2",
+  "channel": "rc",
+  "requiredModules": [
+    "v71-config.js",
+    "v71-data.js",
+    "v71-budget-import.js",
+    "v71-integration.js",
+    "v71-self-test.js"
+  ],
+  "requiredTables": [
+    "pre_vendas",
+    "budgets",
+    "budget_catalog",
+    "ecosystem_catalog",
+    "release_versions"
+  ]
+}
