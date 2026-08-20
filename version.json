@@ -1,0 +1,8 @@
+{
+  "version": "7.1.0-rc.1",
+  "stableBase": "7.0.2",
+  "channel": "rc",
+  "dataArchitecture": 2,
+  "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog"],
+  "published": false
+}

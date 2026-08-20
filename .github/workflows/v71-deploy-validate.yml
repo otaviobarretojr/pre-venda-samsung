@@ -1,0 +1,45 @@
+name: V7.1 Deploy and Published Version Validation
+on:
+  workflow_dispatch:
+    inputs:
+      published_url:
+        description: URL pública do app, sem barra final
+        required: true
+        type: string
+      expected_version:
+        description: Versão esperada
+        required: false
+        default: 7.1.0
+        type: string
+permissions:
+  contents: read
+jobs:
+  validate-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source manifest
+        run: |
+          node -e "const v=require('./version.json'); if(!v.version.startsWith('7.1.')) process.exit(1); console.log(v)"
+  validate-published:
+    needs: validate-source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 15
+      - name: Validate published manifest and app
+        env:
+          BASE_URL: ${{ inputs.published_url }}
+          EXPECTED: ${{ inputs.expected_version }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 "$BASE_URL/version.json?ts=$(date +%s)" -o /tmp/version.json
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 "$BASE_URL/index.html?ts=$(date +%s)" -o /tmp/index.html
+          node - <<'NODE'
+          const fs=require('fs');
+          const v=JSON.parse(fs.readFileSync('/tmp/version.json','utf8'));
+          const expected=process.env.EXPECTED;
+          if(!String(v.version).startsWith(expected)) throw Error(`Publicado ${v.version}; esperado ${expected}`);
+          if(v.stableBase!=='7.0.2') throw Error('Base estável divergente');
+          console.log(`Publicação validada: ${v.version}`);
+          NODE
