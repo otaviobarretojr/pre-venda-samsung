@@ -1,0 +1,12 @@
+(()=>{
+'use strict';
+const RELEASE='7.1.1';
+const state={online:navigator.onLine,syncing:false,lastSync:null,lastError:null};
+let timer=null;
+function pill(){let el=document.getElementById('v711SyncStatus');if(el)return el;el=document.createElement('button');el.id='v711SyncStatus';el.type='button';el.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;border:1px solid #d1d5db;border-radius:999px;background:#fff;padding:8px 12px;font:600 12px system-ui;box-shadow:0 6px 24px rgba(0,0,0,.12);cursor:pointer';el.onclick=()=>refresh(true);document.body?.appendChild(el);return el}
+function paint(){const el=pill();if(!el)return;let text;if(!state.online)text='Offline • dados locais';else if(state.syncing)text='Sincronizando…';else if(state.lastError)text='Sync pendente • toque para tentar';else if(state.lastSync)text='Online • '+new Date(state.lastSync).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});else text='Online';el.textContent=text;el.title='V'+RELEASE+' • toque para sincronizar agora';document.documentElement.dataset.syncState=!state.online?'offline':state.syncing?'syncing':state.lastError?'error':'online'}
+async function refresh(manual=false){if(!navigator.onLine){state.online=false;paint();return false}if(state.syncing)return false;state.online=true;state.syncing=true;state.lastError=null;paint();try{const d=window.V71Data;if(!d)throw Error('Camada de dados indisponível');await Promise.allSettled([d.preSale.list(),d.budgets.list(),d.budgetCatalog.list(),d.ecosystem.list()]);state.lastSync=Date.now();window.dispatchEvent(new CustomEvent('pre-sale:v711-synced',{detail:{at:state.lastSync,manual}}));return true}catch(e){state.lastError=e.message||String(e);console.warn('[V7.1.1] sync',e);return false}finally{state.syncing=false;paint()}}
+function schedule(){clearInterval(timer);timer=setInterval(()=>{if(document.visibilityState==='visible')refresh(false)},30000)}
+window.addEventListener('online',()=>{state.online=true;refresh(false)});window.addEventListener('offline',()=>{state.online=false;paint()});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh(false)});window.V71Data?.bus?.addEventListener?.('message',()=>{if(document.visibilityState==='visible')setTimeout(()=>refresh(false),120)});window.addEventListener('storage',e=>{if(e.key?.startsWith('samsung_')&&document.visibilityState==='visible')setTimeout(()=>refresh(false),120)});
+window.V711_STABILITY={state,refresh,release:RELEASE};paint();schedule();setTimeout(()=>refresh(false),900);
+})();
