@@ -1,0 +1,41 @@
+name: V7.1 Infrastructure Validation
+on:
+  push:
+    branches: [v7.1-infrastructure]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check v71-config.js
+          node --check v71-data.js
+          node --check ecosystem-v454.js
+          node --check v5.js
+          node --check budget-v570.js
+          node --check budget-history-v600.js
+      - name: V7.1 architecture contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const v=JSON.parse(fs.readFileSync('version.json','utf8'));
+          if(!String(v.version).startsWith('7.1.')) throw Error('version.json não é V7.1');
+          const sql=fs.readFileSync('supabase-v71-migration.sql','utf8');
+          for(const t of ['budgets','budget_catalog','ecosystem_catalog','release_versions']) if(!sql.includes(`public.${t}`)) throw Error(`Tabela ausente: ${t}`);
+          if(/drop\s+table|truncate\s+table/i.test(sql)) throw Error('Migração destrutiva não permitida');
+          const cfg=fs.readFileSync('v71-config.js','utf8');
+          for(const t of ['pre_vendas','budgets','budget_catalog','ecosystem_catalog']) if(!cfg.includes(t)) throw Error(`Base não separada: ${t}`);
+          console.log('V7.1 contract OK',v.version);
+          NODE
+      - name: Stable base protection
+        run: |
+          git diff --exit-code ${{ github.event.before || 'HEAD^' }} HEAD -- supabase-online-setup.sql || true
+          grep -q 'stableBase.*7.0.2' v71-config.js
