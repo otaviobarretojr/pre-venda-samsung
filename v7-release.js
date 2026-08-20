@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const RELEASE='7.1.0-rc.1';
+const RELEASE='7.1.0';
 const STABLE_BASE='7.0.2';
-const CACHE_EPOCH='v7-1-rc-1-separated-data';
+const CACHE_EPOCH='v7-1-0-separated-data';
 window.PRE_SALE_RELEASE=RELEASE;
 window.PRE_SALE_STABLE_BASE=STABLE_BASE;
 window.PRE_SALE_CACHE_EPOCH=CACHE_EPOCH;
