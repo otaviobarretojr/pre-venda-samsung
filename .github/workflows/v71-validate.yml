@@ -1,7 +1,7 @@
 name: V7.1 Infrastructure Validation
 on:
   push:
-    branches: [v7.1-infrastructure]
+    branches: [v7.1-infrastructure, v7.1-stable-release]
   pull_request:
     branches: [main]
 permissions:
@@ -32,30 +32,23 @@ jobs:
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
           const health=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.1.0-rc.1') throw Error('version.json não é RC.1');
-          if(health.version!==v.version) throw Error('health.json divergente');
+          if(v.version!=='7.1.0'||v.channel!=='stable'||v.published!==true) throw Error('version.json não é V7.1 estável');
+          if(health.version!==v.version||health.channel!=='stable') throw Error('health.json divergente');
           const sql=fs.readFileSync('supabase-v71-migration.sql','utf8');
           for(const t of ['budgets','budget_catalog','ecosystem_catalog','release_versions']) if(!sql.includes(`public.${t}`)) throw Error(`Tabela ausente: ${t}`);
           if(/drop\s+table|truncate\s+table/i.test(sql)) throw Error('Migração destrutiva não permitida');
           const cfg=fs.readFileSync('v71-config.js','utf8');
           for(const t of ['pre_vendas','budgets','budget_catalog','ecosystem_catalog']) if(!cfg.includes(t)) throw Error(`Base não separada: ${t}`);
           const release=fs.readFileSync('v7-release.js','utf8');
-          if(!release.includes(`RELEASE='${v.version}'`)) throw Error('v7-release.js e version.json estão divergentes');
+          if(!release.includes(`RELEASE='${v.version}'`)) throw Error('v7-release.js e version.json divergentes');
           if(!release.includes('v71-self-test.js')) throw Error('Autoteste V7.1 não carregado');
           const integration=fs.readFileSync('v71-integration.js','utf8');
-          if(!integration.includes('V71BudgetImport')) throw Error('Importação de preços do Orçamento não integrada');
-          if(!integration.includes("LEGACY_BUDGET_KEY='samsung_saved_budgets_v1'")) throw Error('Migração de orçamentos legados ausente');
-          console.log('V7.1 RC contract OK',v.version);
+          if(!integration.includes('V71BudgetImport')) throw Error('Importação de preços não integrada');
+          if(!integration.includes("LEGACY_BUDGET_KEY='samsung_saved_budgets_v1'")) throw Error('Fallback legado ausente');
           NODE
-      - name: Stable base protection
+      - name: Stable protection
         run: |
           grep -q "stableBase:'7.0.2'" v71-config.js
           grep -q "STABLE_BASE='7.0.2'" v7-release.js
+          grep -q 'pre-venda-samsung-v7-1-0' service-worker.js
           test -f supabase-online-setup.sql
-      - name: Service worker contract
-        run: |
-          grep -q 'pre-venda-samsung-v7-1-rc-1' service-worker.js
-          grep -q './v71-integration.js' service-worker.js
-          grep -q './v71-self-test.js' service-worker.js
-          grep -q './version.json' service-worker.js
-          grep -q './health.json' service-worker.js

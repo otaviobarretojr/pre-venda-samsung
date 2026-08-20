@@ -18,13 +18,11 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V7.1 release
+      - name: Validate V7.1 stable
         run: |
           node --check v71-config.js
           node --check v71-data.js
@@ -36,12 +34,11 @@ jobs:
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
           const h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.1.0-rc.1') throw new Error(`Versão inesperada: ${v.version}`);
-          if(h.version!==v.version) throw new Error('health/version divergentes');
+          if(v.version!=='7.1.0'||v.channel!=='stable'||v.published!==true) throw new Error('Manifesto de produção inválido');
+          if(h.version!==v.version||h.channel!=='stable') throw new Error('health/version divergentes');
           if(v.stableBase!=='7.0.2') throw new Error('stableBase divergente');
-          console.log('Release validada:',v.version);
+          console.log('Release estável validada:',v.version);
           NODE
-
   deploy:
     needs: validate
     environment:
@@ -49,14 +46,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: '.'
-      - name: Deploy Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
