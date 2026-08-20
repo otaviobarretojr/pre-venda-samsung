@@ -1,7 +1,7 @@
 {
-  "version": "7.1.0-rc.1",
+  "version": "7.1.0",
   "stableBase": "7.0.2",
-  "channel": "rc",
+  "channel": "stable",
   "requiredModules": [
     "v71-config.js",
     "v71-data.js",
