@@ -18,6 +18,9 @@ jobs:
         run: |
           node --check v71-config.js
           node --check v71-data.js
+          node --check v71-budget-import.js
+          node --check v71-integration.js
+          node --check v7-release.js
           node --check ecosystem-v454.js
           node --check v5.js
           node --check budget-v570.js
@@ -33,9 +36,20 @@ jobs:
           if(/drop\s+table|truncate\s+table/i.test(sql)) throw Error('Migração destrutiva não permitida');
           const cfg=fs.readFileSync('v71-config.js','utf8');
           for(const t of ['pre_vendas','budgets','budget_catalog','ecosystem_catalog']) if(!cfg.includes(t)) throw Error(`Base não separada: ${t}`);
+          const release=fs.readFileSync('v7-release.js','utf8');
+          if(!release.includes(`RELEASE='${v.version}'`)) throw Error('v7-release.js e version.json estão divergentes');
+          const integration=fs.readFileSync('v71-integration.js','utf8');
+          if(!integration.includes('V71BudgetImport')) throw Error('Importação de preços do Orçamento não integrada');
+          if(!integration.includes("LEGACY_BUDGET_KEY='samsung_saved_budgets_v1'")) throw Error('Migração de orçamentos legados ausente');
           console.log('V7.1 contract OK',v.version);
           NODE
       - name: Stable base protection
         run: |
-          git diff --exit-code ${{ github.event.before || 'HEAD^' }} HEAD -- supabase-online-setup.sql || true
-          grep -q 'stableBase.*7.0.2' v71-config.js
+          grep -q "stableBase:'7.0.2'" v71-config.js
+          grep -q "STABLE_BASE='7.0.2'" v7-release.js
+          test -f supabase-online-setup.sql
+      - name: Service worker contract
+        run: |
+          grep -q 'pre-venda-samsung-v7-1-infra-2' service-worker.js
+          grep -q './v71-integration.js' service-worker.js
+          grep -q './version.json' service-worker.js
