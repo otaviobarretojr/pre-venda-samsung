@@ -22,20 +22,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V7.1 stable
+      - name: Validate V7.1.1 stable
         run: |
           node --check v71-config.js
           node --check v71-data.js
           node --check v71-budget-import.js
           node --check v71-integration.js
+          node --check v711-stability.js
           node --check v71-self-test.js
           node --check v7-release.js
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
           const h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.1.0'||v.channel!=='stable'||v.published!==true) throw new Error('Manifesto de produção inválido');
-          if(h.version!==v.version||h.channel!=='stable') throw new Error('health/version divergentes');
+          if(v.version!=='7.1.1'||v.channel!=='stable'||v.published!==true) throw new Error('Manifesto de produção inválido');
+          if(h.version!==v.version||!h.requiredModules.includes('v711-stability.js')) throw new Error('health/version divergentes');
           if(v.stableBase!=='7.0.2') throw new Error('stableBase divergente');
           console.log('Release estável validada:',v.version);
           NODE
