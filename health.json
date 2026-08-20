@@ -1,5 +1,5 @@
 {
-  "version": "7.1.0",
+  "version": "7.1.1",
   "stableBase": "7.0.2",
   "channel": "stable",
   "requiredModules": [
@@ -7,6 +7,7 @@
     "v71-data.js",
     "v71-budget-import.js",
     "v71-integration.js",
+    "v711-stability.js",
     "v71-self-test.js"
   ],
   "requiredTables": [
