@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const config=Object.freeze({
- version:'7.1.0-infra.1',
+ version:'7.1.0-infra.2',
  stableBase:'7.0.2',
  data:{
   preSale:{table:'pre_vendas',localKey:'samsung_pre_vendas'},
