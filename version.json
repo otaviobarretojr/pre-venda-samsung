@@ -1,7 +1,7 @@
 {
-  "version": "7.1.0-infra.2",
+  "version": "7.1.0-rc.1",
   "stableBase": "7.0.2",
-  "channel": "infrastructure",
+  "channel": "rc",
   "dataArchitecture": 2,
   "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog"],
   "published": false
