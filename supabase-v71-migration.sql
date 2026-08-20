@@ -22,10 +22,16 @@ create table if not exists public.ecosystem_catalog (
  category text,
  capacities jsonb not null default '[]'::jsonb,
  colors jsonb not null default '[]'::jsonb,
+ final_prices jsonb not null default '{}'::jsonb,
+ price_history jsonb not null default '{}'::jsonb,
  offers jsonb not null default '{}'::jsonb,
+ source text,
  active boolean not null default true,
  updated_at timestamptz not null default now()
 );
+alter table public.ecosystem_catalog add column if not exists final_prices jsonb not null default '{}'::jsonb;
+alter table public.ecosystem_catalog add column if not exists price_history jsonb not null default '{}'::jsonb;
+alter table public.ecosystem_catalog add column if not exists source text;
 create table if not exists public.release_versions (
  version text primary key,
  commit_sha text,
