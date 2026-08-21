@@ -1,8 +1,8 @@
 {
-  "version": "8.5.1",
-  "stableBase": "8.5.0",
+  "version": "8.5.2",
+  "stableBase": "8.5.1",
   "channel": "stable",
   "canonicalHost": "https://otaviobarretojr.github.io/pre-venda-samsung/",
-  "requiredModules": ["v71-config.js","v71-data.js","v71-budget-import.js","v71-integration.js","v711-stability.js","v72-core.js","v73-operations.js","v74-polish.js","v741-deploy-guard.js","v80-maturity.js","v81-abastecimento.js","v82-supply-online.js","v84-history.js","v85-supply-ui.js","v851-history-status.js","v71-self-test.js"],
+  "requiredModules": ["v71-config.js","v71-data.js","v71-budget-import.js","v71-integration.js","v711-stability.js","v72-core.js","v73-operations.js","v74-polish.js","v741-deploy-guard.js","v80-maturity.js","v81-abastecimento.js","v82-supply-online.js","v84-history.js","v85-supply-ui.js","v851-history-status.js","v852-status-sync.js","v71-self-test.js"],
   "requiredTables": ["pre_vendas","budgets","budget_catalog","ecosystem_catalog","sync_tombstones","data_backups","sync_events","audit_events","commercial_stages","inventory_imports","inventory_items","inventory_links","supply_requests","release_versions"]
 }
