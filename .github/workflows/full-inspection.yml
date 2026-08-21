@@ -2,6 +2,8 @@ name: Full V8.6.0 Inspection
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
