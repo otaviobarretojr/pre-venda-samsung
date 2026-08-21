@@ -1,4 +1,4 @@
-name: V8.5.1 History Status Validation
+name: V8.5.2 History Status Sync Validation
 on:
   push:
     branches: [v8.5.1-history-status]
@@ -18,20 +18,18 @@ jobs:
         run: |
           node --check v71-config.js
           node --check v741-deploy-guard.js
-          node --check v81-abastecimento.js
-          node --check v82-supply-online.js
           node --check v84-history.js
-          node --check v85-supply-ui.js
           node --check v851-history-status.js
+          node --check v852-status-sync.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V8.5.1 history status contract
+      - name: V8.5.2 history status sync contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.5.1'||v.stableBase!=='8.5.0'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v851-history-status.js','utf8');
-          for(const x of ['Aguardando produto','Cliente avisado','Retirado','statusVenda','clienteAvisadoAt','retiradoAt','data-v851-status','upsertHistory'])if(!m.includes(x))throw Error('status de histórico incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-1'))throw Error('cache divergente');
-          if(h.version!=='8.5.1'||!h.requiredModules.includes('v851-history-status.js'))throw Error('health divergente');
+          if(v.version!=='8.5.2'||v.stableBase!=='8.5.1'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v852-status-sync.js','utf8');
+          for(const x of ['status_venda','status_updated_at','cliente_avisado_at','retirado_at','method:\'PATCH\'','data-v852-status','MutationObserver','syncRemoteStatuses'])if(!m.includes(x))throw Error('sync de status incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-2'))throw Error('cache divergente');
+          if(h.version!=='8.5.2'||!h.requiredModules.includes('v852-status-sync.js'))throw Error('health divergente');
           NODE
