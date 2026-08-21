@@ -1,4 +1,4 @@
-name: V8.6.4 Clean Supply Validation
+name: V8.6.5 Event Sync Validation
 on:
   pull_request:
     branches: [main]
@@ -15,12 +15,13 @@ jobs:
       - name: JavaScript syntax
         run: |
           for f in *.js scripts/*.mjs; do node --check "$f"; done
-      - name: V8.6.4 contract
+      - name: V8.6.5 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.6.4'||v.stableBase!=='8.6.3'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v864-supply-clean.js','utf8');for(const x of ['Pré-vendas','Entregues','Saldo disponível','data-v864-stock','v864Products','v864SortField','v864SortDir'])if(!m.includes(x))throw Error('dashboard incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-6-4'))throw Error('cache divergente');
-          if(h.version!=='8.6.4'||!h.requiredModules.includes('v864-supply-clean.js'))throw Error('health divergente');
+          if(v.version!=='8.6.5'||v.stableBase!=='8.6.4'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          for(const f of ['v711-stability.js','v72-core.js','v852-status-sync.js']){const s=fs.readFileSync(f,'utf8');if(s.includes('setInterval('))throw Error('polling periódico ainda presente em '+f)}
+          const delivery=fs.readFileSync('v861-delivery-close.js','utf8');for(const x of ['confirmDelivered','Entrega não confirmada na base online','pre-sale:v865-mutated'])if(!delivery.includes(x))throw Error('entrega autoritativa incompleta '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-6-5'))throw Error('cache divergente');
+          if(h.version!=='8.6.5'||h.stableBase!=='8.6.4')throw Error('health divergente');
           NODE
