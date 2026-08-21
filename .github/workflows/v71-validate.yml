@@ -1,7 +1,7 @@
-name: V8.2.3 HTML Inventory Hotfix Validation
+name: V8.2.3 Multi-lot Supply Hotfix Validation
 on:
   push:
-    branches: [v8.2.3-html-inventory-hotfix]
+    branches: [v8.2.4-multilote-inventory]
   pull_request:
     branches: [main]
 permissions:
@@ -22,13 +22,15 @@ jobs:
           node --check v82-supply-online.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V8.2.3 contract
+      - name: Multi-lot inventory contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
           if(v.version!=='8.2.3'||v.stableBase!=='8.2.2'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['parseHtmlInventory','tabelaRegistroInventario','DOMParser','fileInput.onchange'])if(!m.includes(x))throw Error('parser HTML incompleto '+x);
-          const t=fs.readFileSync('v71-self-test.js','utf8');if(!t.includes('html-inventory-parser'))throw Error('teste parser HTML ausente');
+          const m=fs.readFileSync('v81-abastecimento.js','utf8');
+          for(const x of ['parseHtmlInventory','mergeInventory','inventoryKey','wearable','wearableColor','Adicionar outro inventário'])if(!m.includes(x))throw Error('multi-lote incompleto '+x);
+          const online=fs.readFileSync('v82-supply-online.js','utf8');
+          for(const x of ['flatMap(saleNames)','consolidated:true','batch_items'])if(!online.includes(x))throw Error('sync consolidado incompleto '+x);
           const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-3'))throw Error('cache divergente');
           if(h.version!=='8.2.3')throw Error('health divergente');
           NODE
