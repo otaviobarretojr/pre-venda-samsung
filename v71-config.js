@@ -1,17 +1,21 @@
 (()=>{
 'use strict';
 const config=Object.freeze({
- version:'7.1.1',
- stableBase:'7.0.2',
+ version:'7.2.0',
+ stableBase:'7.1.1',
  data:{
   preSale:{table:'pre_vendas',localKey:'samsung_pre_vendas'},
   budgets:{table:'budgets',localKey:'samsung_budget_history_v71'},
   budgetCatalog:{table:'budget_catalog',localKey:'samsung_budget_catalog_v71'},
   ecosystem:{table:'ecosystem_catalog',localKey:'samsung_ecosystem_catalog_v71'},
-  consultants:{setting:'consultants',localKey:'samsung_consultants'}
+  consultants:{setting:'consultants',localKey:'samsung_consultants'},
+  tombstones:{table:'sync_tombstones',localKey:'samsung_sync_tombstones_v72'},
+  backups:{table:'data_backups',localKey:'samsung_data_backups_v72'},
+  syncEvents:{table:'sync_events',localKey:'samsung_sync_events_v72'}
  },
  release:{manifest:'version.json',health:'health.json'}
 });
 window.PRE_SALE_V71=config;
+window.PRE_SALE_V72=config;
 window.dispatchEvent(new CustomEvent('pre-sale:v71-config',{detail:config}));
 })();
