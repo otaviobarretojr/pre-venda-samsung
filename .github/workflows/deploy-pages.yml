@@ -19,10 +19,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V8.6.2 stable
+      - name: Validate V8.6.3 stable
         run: |
           for f in *.js scripts/*.mjs; do node --check "$f"; done
-          node -e "const fs=require('fs');const v=JSON.parse(fs.readFileSync('version.json'));const h=JSON.parse(fs.readFileSync('health.json'));if(v.version!=='8.6.2'||v.stableBase!=='8.6.1'||h.version!=='8.6.2')process.exit(1);if(!h.requiredModules.includes('v862-supply-sorting.js')||!h.requiredTables.includes('manual_stock'))process.exit(1)"
+          node -e "const fs=require('fs');const v=JSON.parse(fs.readFileSync('version.json'));const h=JSON.parse(fs.readFileSync('health.json'));if(v.version!=='8.6.3'||v.stableBase!=='8.6.2'||h.version!=='8.6.3')process.exit(1);if(!h.requiredModules.includes('v861-delivery-close.js')||!h.requiredTables.includes('manual_stock'))process.exit(1)"
   deploy:
     needs: validate
     permissions:
@@ -56,7 +56,7 @@ jobs:
       - name: Verify published URL
         env:
           PRODUCTION_URL: ${{ needs.deploy.outputs.page_url }}
-          EXPECTED_VERSION: 8.6.2
+          EXPECTED_VERSION: 8.6.3
         run: node scripts/verify-production.mjs
       - name: Persist production proof
         uses: actions/github-script@v7
@@ -67,5 +67,5 @@ jobs:
           script: |
             const path='verified-production.json'; let sha;
             try { sha=(await github.rest.repos.getContent({owner:context.repo.owner,repo:context.repo.repo,path,ref:'main'})).data.sha; } catch(e) { if(e.status!==404) throw e; }
-            const payload={version:'8.6.2',status:'verified',canonicalHost:process.env.PRODUCTION_URL,verifiedAt:new Date().toISOString(),commit:context.sha};
-            await github.rest.repos.createOrUpdateFileContents({owner:context.repo.owner,repo:context.repo.repo,path,message:'ci: record verified V8.6.2 production [skip deploy]',content:Buffer.from(JSON.stringify(payload,null,2)+'\n').toString('base64'),sha,branch:'main'});
+            const payload={version:'8.6.3',status:'verified',canonicalHost:process.env.PRODUCTION_URL,verifiedAt:new Date().toISOString(),commit:context.sha};
+            await github.rest.repos.createOrUpdateFileContents({owner:context.repo.owner,repo:context.repo.repo,path,message:'ci: record verified V8.6.3 production [skip deploy]',content:Buffer.from(JSON.stringify(payload,null,2)+'\n').toString('base64'),sha,branch:'main'});
