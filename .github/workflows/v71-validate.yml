@@ -1,7 +1,7 @@
-name: V8.4 Presale History Validation
+name: V8.5 Supply Linking Validation
 on:
   push:
-    branches: [v8.4-history-presale-only]
+    branches: [v8.5-supply-linking-compact]
   pull_request:
     branches: [main]
 permissions:
@@ -21,15 +21,16 @@ jobs:
           node --check v81-abastecimento.js
           node --check v82-supply-online.js
           node --check v84-history.js
+          node --check v85-supply-ui.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V8.4 history contract
+      - name: V8.5 supply contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.4.0'||v.stableBase!=='8.3.0'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v84-history.js','utf8');
-          for(const x of ['removeBudgetHistory','budgetSave','Histórico de Pré-vendas','v84HistoryKpis','v84QuickFilters','Exportar pré-vendas'])if(!m.includes(x))throw Error('histórico incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-4-0'))throw Error('cache divergente');
-          if(h.version!=='8.4.0'||!h.requiredModules.includes('v84-history.js'))throw Error('health divergente');
+          if(v.version!=='8.5.0'||v.stableBase!=='8.4.0'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v85-supply-ui.js','utf8');
+          for(const x of ['candidateNames','__NO_STOCK__','v85-link-btn','Selecionar produtos','Sem vínculo / sem saldo','wear|watch|ecos'])if(!m.includes(x))throw Error('abastecimento v8.5 incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-0'))throw Error('cache divergente');
+          if(h.version!=='8.5.0'||!h.requiredModules.includes('v85-supply-ui.js'))throw Error('health divergente');
           NODE
