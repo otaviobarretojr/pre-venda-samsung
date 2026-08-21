@@ -1,4 +1,4 @@
-name: V8.6.2 Supply Sorting Validation
+name: V8.6.3 Delivery Click Validation
 on:
   pull_request:
     branches: [main]
@@ -15,13 +15,13 @@ jobs:
       - name: JavaScript syntax
         run: |
           for f in *.js scripts/*.mjs; do node --check "$f"; done
-      - name: V8.6.2 contract
+      - name: V8.6.3 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.6.2'||v.stableBase!=='8.6.1'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v862-supply-sorting.js','utf8');for(const x of ['v862SortField','v862SortDir','Crescente','Decrescente','balance','stock'])if(!m.includes(x))throw Error('ordenação incompleta '+x);
-          const s=fs.readFileSync('v71-self-test.js','utf8');for(const x of ['supply-sort-field','supply-sort-direction'])if(!s.includes(x))throw Error('self-test incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-6-2'))throw Error('cache divergente');
-          if(h.version!=='8.6.2'||!h.requiredModules.includes('v862-supply-sorting.js'))throw Error('health divergente');
+          if(v.version!=='8.6.3'||v.stableBase!=='8.6.2'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v861-delivery-close.js','utf8');for(const x of ['bindDelegatedClick','type="button"','saving=new Set','data-v861-deliver','O servidor não confirmou'])if(!m.includes(x))throw Error('hotfix de clique incompleto '+x);
+          const s=fs.readFileSync('scripts/full-inspection.mjs','utf8');for(const x of ['delivery-click-status','delivery-click-badge','page.route'])if(!s.includes(x))throw Error('teste de clique incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-6-3'))throw Error('cache divergente');
+          if(h.version!=='8.6.3'||!h.requiredModules.includes('v861-delivery-close.js'))throw Error('health divergente');
           NODE
