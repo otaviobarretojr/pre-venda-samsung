@@ -1,14 +1,5 @@
-const CACHE_NAME='pre-venda-samsung-v7-2-0';
-const APP_SHELL=['./','./index.html','./v5.css','./v51.css','./v7-release.js','./v71-config.js','./v71-data.js','./v71-budget-import.js','./v71-integration.js','./v711-stability.js','./v72-core.js','./v71-self-test.js','./version.json','./health.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE_NAME='pre-venda-samsung-v7-3-0';
+const APP_SHELL=['./','./index.html','./v5.css','./v51.css','./v7-release.js','./v71-config.js','./v71-data.js','./v71-budget-import.js','./v71-integration.js','./v711-stability.js','./v72-core.js','./v73-operations.js','./v71-self-test.js','./version.json','./health.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',event=>{
- const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);
- if(url.hostname.includes('supabase.co')){event.respondWith(fetch(req));return}
- if(req.mode==='navigate')return event.respondWith(fetch(req,{cache:'no-store'}).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put('./index.html',r.clone()));return r}).catch(()=>caches.match('./index.html')));
- const critical=APP_SHELL.some(x=>url.pathname.endsWith(x.replace('./','')));
- const immutable=/\.(?:png|jpg|jpeg|webp|svg|ico)$/i.test(url.pathname);
- if(immutable)return event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put(req,r.clone()));return r})));
- if(critical)return event.respondWith(fetch(req,{cache:'no-store'}).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put(req,r.clone()));return r}).catch(()=>caches.match(req)));
- event.respondWith(fetch(req,{cache:'no-store'}).catch(()=>caches.match(req)));
-});
+self.addEventListener('fetch',event=>{const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.hostname.includes('supabase.co')){event.respondWith(fetch(req));return}if(req.mode==='navigate')return event.respondWith(fetch(req,{cache:'no-store'}).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put('./index.html',r.clone()));return r}).catch(()=>caches.match('./index.html')));const critical=APP_SHELL.some(x=>url.pathname.endsWith(x.replace('./','')));const immutable=/\.(?:png|jpg|jpeg|webp|svg|ico)$/i.test(url.pathname);if(immutable)return event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put(req,r.clone()));return r})));if(critical)return event.respondWith(fetch(req,{cache:'no-store'}).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put(req,r.clone()));return r}).catch(()=>caches.match(req)));event.respondWith(fetch(req,{cache:'no-store'}).catch(()=>caches.match(req)))});
