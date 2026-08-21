@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const config=Object.freeze({
- version:'7.3.0',
- stableBase:'7.2.0',
+ version:'7.4.0',
+ stableBase:'7.3.0',
  data:{
   preSale:{table:'pre_vendas',localKey:'samsung_pre_vendas'},
   budgets:{table:'budgets',localKey:'samsung_budget_history_v71'},
@@ -17,6 +17,6 @@ const config=Object.freeze({
  },
  release:{manifest:'version.json',health:'health.json'}
 });
-window.PRE_SALE_V71=config;window.PRE_SALE_V72=config;window.PRE_SALE_V73=config;
+window.PRE_SALE_V71=config;window.PRE_SALE_V72=config;window.PRE_SALE_V73=config;window.PRE_SALE_V74=config;
 window.dispatchEvent(new CustomEvent('pre-sale:v71-config',{detail:config}));
 })();
