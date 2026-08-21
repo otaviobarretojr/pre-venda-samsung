@@ -1,9 +1,9 @@
 {
-  "version": "7.1.1",
-  "stableBase": "7.0.2",
+  "version": "7.2.0",
+  "stableBase": "7.1.1",
   "channel": "stable",
-  "dataArchitecture": 2,
-  "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog"],
-  "focus": ["stability", "sync", "ux"],
+  "dataArchitecture": 3,
+  "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog", "sync_tombstones", "data_backups", "sync_events"],
+  "focus": ["strong-sync", "performance", "ux", "recovery", "consolidation"],
   "published": true
 }
