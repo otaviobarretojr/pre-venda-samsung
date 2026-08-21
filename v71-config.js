@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
 const config=Object.freeze({
- version:'7.4.1',stableBase:'7.4.0',canonicalHost:'https://otaviobarretojr.github.io/pre-venda-samsung/',fallbackHost:'https://pre-venda-samsung.pages.dev/',
+ version:'8.0.0',stableBase:'7.4.1',canonicalHost:'https://otaviobarretojr.github.io/pre-venda-samsung/',fallbackHost:'https://pre-venda-samsung.pages.dev/',
  data:{preSale:{table:'pre_vendas',localKey:'samsung_pre_vendas'},budgets:{table:'budgets',localKey:'samsung_budget_history_v71'},budgetCatalog:{table:'budget_catalog',localKey:'samsung_budget_catalog_v71'},ecosystem:{table:'ecosystem_catalog',localKey:'samsung_ecosystem_catalog_v71'},consultants:{setting:'consultants',localKey:'samsung_consultants'},tombstones:{table:'sync_tombstones',localKey:'samsung_sync_tombstones_v72'},backups:{table:'data_backups',localKey:'samsung_data_backups_v72'},syncEvents:{table:'sync_events',localKey:'samsung_sync_events_v72'},audit:{table:'audit_events',localKey:'samsung_audit_events_v73'},commercialStages:{table:'commercial_stages',localKey:'samsung_commercial_stages_v73'}},
  release:{manifest:'version.json',health:'health.json'}
 });
-window.PRE_SALE_V71=config;window.PRE_SALE_V72=config;window.PRE_SALE_V73=config;window.PRE_SALE_V74=config;window.PRE_SALE_V741=config;window.dispatchEvent(new CustomEvent('pre-sale:v71-config',{detail:config}));
+window.PRE_SALE_V71=config;window.PRE_SALE_V72=config;window.PRE_SALE_V73=config;window.PRE_SALE_V74=config;window.PRE_SALE_V741=config;window.PRE_SALE_V80=config;window.dispatchEvent(new CustomEvent('pre-sale:v71-config',{detail:config}));
 })();
