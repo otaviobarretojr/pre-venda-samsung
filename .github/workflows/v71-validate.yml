@@ -1,7 +1,7 @@
-name: V8.2.3 Multi-lot Supply Hotfix Validation
+name: V8.2.4 Authoritative Inventory Validation
 on:
   push:
-    branches: [v8.2.4-multilote-inventory]
+    branches: [v8.2.4-authoritative-inventory]
   pull_request:
     branches: [main]
 permissions:
@@ -22,15 +22,16 @@ jobs:
           node --check v82-supply-online.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: Multi-lot inventory contract
+      - name: Authoritative inventory contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.2.3'||v.stableBase!=='8.2.2'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          if(v.version!=='8.2.4'||v.stableBase!=='8.2.3'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
           const m=fs.readFileSync('v81-abastecimento.js','utf8');
-          for(const x of ['parseHtmlInventory','mergeInventory','inventoryKey','wearable','wearableColor','Adicionar outro inventário'])if(!m.includes(x))throw Error('multi-lote incompleto '+x);
+          for(const x of ["save(INV_KEY,rows)",'Esta planilha agora é a base atual do inventário','wearable','wearableColor'])if(!m.includes(x))throw Error('snapshot autoritativo incompleto '+x);
+          if(m.includes('mergeInventory('))throw Error('merge de lotes ainda ativo');
           const online=fs.readFileSync('v82-supply-online.js','utf8');
-          for(const x of ['flatMap(saleNames)','consolidated:true','batch_items'])if(!online.includes(x))throw Error('sync consolidado incompleto '+x);
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-3'))throw Error('cache divergente');
-          if(h.version!=='8.2.3')throw Error('health divergente');
+          for(const x of ['authoritative_snapshot:true','order=imported_at.desc&limit=1','flatMap(saleNames)'])if(!online.includes(x))throw Error('sync autoritativo incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-2-4'))throw Error('cache divergente');
+          if(h.version!=='8.2.4')throw Error('health divergente');
           NODE
