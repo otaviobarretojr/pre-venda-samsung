@@ -1,7 +1,7 @@
 {
-  "version": "8.5.3",
-  "status": "verified",
+  "version": "8.6.0",
+  "status": "pending",
   "canonicalHost": "https://otaviobarretojr.github.io/pre-venda-samsung/",
-  "verifiedAt": "2026-08-21T17:47:10.100Z",
-  "commit": "f98bf4b9ab5b4fa90193340e2da9196cf064f2a5"
+  "verifiedAt": null,
+  "commit": null
 }
