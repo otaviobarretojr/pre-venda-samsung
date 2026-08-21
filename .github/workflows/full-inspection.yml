@@ -1,9 +1,8 @@
-name: Full V8.5.3 Inspection
+name: Full V8.6.0 Inspection
 on:
   push:
-    branches: [v8.5.3-full-audit-fixes]
-  pull_request:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
