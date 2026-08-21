@@ -1,7 +1,5 @@
-name: V8.5.3 Full Audit Validation
+name: V8.6.0 Manual Stock Validation
 on:
-  push:
-    branches: [v8.5.3-full-audit-fixes]
   pull_request:
     branches: [main]
 permissions:
@@ -17,13 +15,13 @@ jobs:
       - name: JavaScript syntax
         run: |
           for f in *.js scripts/*.mjs; do node --check "$f"; done
-      - name: V8.5.3 contract
+      - name: V8.6.0 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.5.3'||v.stableBase!=='8.5.2'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const c=fs.readFileSync('v853-compat.js','utf8');for(const x of ['Object.isFrozen','V71BudgetImport','V853Compat'])if(!c.includes(x))throw Error('compat ausente '+x);
-          const s=fs.readFileSync('v71-self-test.js','utf8');for(const x of ['dashboard-management','budget-import-hook','4300'])if(!s.includes(x))throw Error('self-test incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-3'))throw Error('cache divergente');
-          if(h.version!=='8.5.3'||!h.requiredModules.includes('v853-compat.js'))throw Error('health divergente');
+          if(v.version!=='8.6.0'||v.stableBase!=='8.5.3'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v860-supply-dashboard.js','utf8');for(const x of ['manual_stock','Aguardando produto','Cliente avisado','Retirado','data-stock','v860Products'])if(!m.includes(x))throw Error('abastecimento incompleto '+x);
+          const s=fs.readFileSync('v71-self-test.js','utf8');for(const x of ['manual-stock-dashboard','supply-stock-input','supply-product-filter'])if(!s.includes(x))throw Error('self-test incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-6-0'))throw Error('cache divergente');
+          if(h.version!=='8.6.0'||!h.requiredModules.includes('v860-supply-dashboard.js')||!h.requiredTables.includes('manual_stock'))throw Error('health divergente');
           NODE
