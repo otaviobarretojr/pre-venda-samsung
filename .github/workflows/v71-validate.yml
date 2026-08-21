@@ -1,7 +1,7 @@
-name: V8.3 Supply Dashboard Validation
+name: V8.4 Presale History Validation
 on:
   push:
-    branches: [v8.3-supply-dashboard-ui]
+    branches: [v8.4-history-presale-only]
   pull_request:
     branches: [main]
 permissions:
@@ -20,15 +20,16 @@ jobs:
           node --check v741-deploy-guard.js
           node --check v81-abastecimento.js
           node --check v82-supply-online.js
+          node --check v84-history.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V8.3 supply dashboard contract
+      - name: V8.4 history contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.3.0'||v.stableBase!=='8.2.4'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v81-abastecimento.js','utf8');
-          for(const x of ['preVendaSupplyMonitoredV83','v83Search','v83Status','v83Category','v83Monitored','toggleMonitor','v83-kpis','save(INV_KEY,rows)'])if(!m.includes(x))throw Error('dashboard de abastecimento incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-3-0'))throw Error('cache divergente');
-          if(h.version!=='8.3.0')throw Error('health divergente');
+          if(v.version!=='8.4.0'||v.stableBase!=='8.3.0'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v84-history.js','utf8');
+          for(const x of ['removeBudgetHistory','budgetSave','Histórico de Pré-vendas','v84HistoryKpis','v84QuickFilters','Exportar pré-vendas'])if(!m.includes(x))throw Error('histórico incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-4-0'))throw Error('cache divergente');
+          if(h.version!=='8.4.0'||!h.requiredModules.includes('v84-history.js'))throw Error('health divergente');
           NODE
