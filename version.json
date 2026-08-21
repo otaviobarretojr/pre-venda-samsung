@@ -1,9 +1,10 @@
 {
-  "version": "7.2.0",
-  "stableBase": "7.1.1",
+  "version": "7.3.0",
+  "stableBase": "7.2.0",
   "channel": "stable",
-  "dataArchitecture": 3,
-  "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog", "sync_tombstones", "data_backups", "sync_events"],
-  "focus": ["strong-sync", "performance", "ux", "recovery", "consolidation"],
+  "dataArchitecture": 4,
+  "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog", "sync_tombstones", "data_backups", "sync_events", "audit_events", "commercial_stages"],
+  "focus": ["audit", "management-dashboard", "commercial-flow", "safe-consolidation"],
+  "authentication": false,
   "published": true
 }

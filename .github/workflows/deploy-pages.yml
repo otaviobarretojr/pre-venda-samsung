@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V7.2 stable
+      - name: Validate V7.3 stable
         run: |
           node --check v71-config.js
           node --check v71-data.js
@@ -30,17 +30,16 @@ jobs:
           node --check v71-integration.js
           node --check v711-stability.js
           node --check v72-core.js
+          node --check v73-operations.js
           node --check v71-self-test.js
           node --check v7-release.js
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
           const h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.2.0'||v.channel!=='stable'||v.published!==true) throw new Error('Manifesto de produção inválido');
-          if(h.version!==v.version||!h.requiredModules.includes('v72-core.js')) throw new Error('health/version divergentes');
-          if(v.stableBase!=='7.1.1'||v.dataArchitecture!==3) throw new Error('stableBase/arquitetura divergente');
-          const core=fs.readFileSync('v72-core.js','utf8');
-          for(const req of ['preVendaV72Queue','sync_tombstones','data_backups']) if(!core.includes(req)) throw new Error('V7.2 core incompleto: '+req);
+          if(v.version!=='7.3.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false) throw new Error('Manifesto de produção inválido');
+          if(h.version!==v.version||!h.requiredModules.includes('v73-operations.js')) throw new Error('health/version divergentes');
+          if(v.stableBase!=='7.2.0'||v.dataArchitecture!==4) throw new Error('stableBase/arquitetura divergente');
           console.log('Release estável validada:',v.version);
           NODE
   deploy:

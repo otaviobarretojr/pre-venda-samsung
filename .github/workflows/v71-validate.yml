@@ -1,7 +1,7 @@
-name: V7.2 Consolidation Validation
+name: V7.3 Operations Validation
 on:
   push:
-    branches: [v7.2-consolidation]
+    branches: [v7.3-ops-no-auth]
   pull_request:
     branches: [main]
 permissions:
@@ -22,25 +22,25 @@ jobs:
           node --check v71-integration.js
           node --check v711-stability.js
           node --check v72-core.js
+          node --check v73-operations.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V7.2 contract
+      - name: V7.3 contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8'));
           const h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.2.0'||v.channel!=='stable'||v.published!==true) throw Error('release inválida');
-          if(v.stableBase!=='7.1.1'||v.dataArchitecture!==3) throw Error('base/arquitetura divergente');
-          for(const f of ['v71-config.js','v71-data.js','v71-integration.js','v711-stability.js','v72-core.js','v71-self-test.js','supabase-v72-migration.sql']) if(!fs.existsSync(f)) throw Error('módulo ausente '+f);
-          for(const t of ['sync_tombstones','data_backups','sync_events']) if(!h.requiredTables.includes(t)) throw Error('tabela V7.2 ausente '+t);
-          const rel=fs.readFileSync('v7-release.js','utf8');if(!rel.includes("RELEASE='7.2.0'")||!rel.includes('v72-core.js'))throw Error('loader divergente');
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-2-0')||!sw.includes('v72-core.js'))throw Error('cache divergente');
-          const core=fs.readFileSync('v72-core.js','utf8');for(const x of ['sync_tombstones','data_backups','preVendaV72Queue','before-delete'])if(!core.includes(x))throw Error('proteção ausente '+x);
-          const sql=fs.readFileSync('supabase-v72-migration.sql','utf8');if(/drop\s+table|truncate\s+table/i.test(sql))throw Error('migração destrutiva');
+          if(v.version!=='7.3.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false) throw Error('release inválida');
+          if(v.stableBase!=='7.2.0'||v.dataArchitecture!==4) throw Error('base/arquitetura divergente');
+          for(const f of ['v72-core.js','v73-operations.js','supabase-v73-migration.sql']) if(!fs.existsSync(f)) throw Error('módulo ausente '+f);
+          for(const t of ['audit_events','commercial_stages']) if(!h.requiredTables.includes(t)) throw Error('tabela V7.3 ausente '+t);
+          const ops=fs.readFileSync('v73-operations.js','utf8');for(const x of ['audit_events','commercial_stages','Faturada','Cancelada','V73_COMPATIBILITY'])if(!ops.includes(x))throw Error('operações incompletas '+x);
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-3-0')||!sw.includes('v73-operations.js'))throw Error('cache divergente');
+          const sql=fs.readFileSync('supabase-v73-migration.sql','utf8');if(/drop\s+table|truncate\s+table/i.test(sql))throw Error('migração destrutiva');
           NODE
       - name: Stable base protection
         run: |
-          grep -q "stableBase:'7.1.1'" v71-config.js
-          grep -q "STABLE_BASE='7.1.1'" v7-release.js
+          grep -q "stableBase:'7.2.0'" v71-config.js
+          grep -q "STABLE_BASE='7.2.0'" v7-release.js
           test -f supabase-online-setup.sql

@@ -1,6 +1,6 @@
 {
-  "version": "7.2.0",
-  "stableBase": "7.1.1",
+  "version": "7.3.0",
+  "stableBase": "7.2.0",
   "channel": "stable",
   "requiredModules": [
     "v71-config.js",
@@ -9,6 +9,7 @@
     "v71-integration.js",
     "v711-stability.js",
     "v72-core.js",
+    "v73-operations.js",
     "v71-self-test.js"
   ],
   "requiredTables": [
@@ -19,6 +20,8 @@
     "sync_tombstones",
     "data_backups",
     "sync_events",
+    "audit_events",
+    "commercial_stages",
     "release_versions"
   ]
 }
