@@ -1,7 +1,7 @@
-name: V8.2.1 Sidebar Hotfix Validation
+name: V8.2.2 Import Hotfix Validation
 on:
   push:
-    branches: [v8.2.1-sidebar-hotfix]
+    branches: [v8.2.2-import-hotfix]
   pull_request:
     branches: [main]
 permissions:
@@ -22,13 +22,13 @@ jobs:
           node --check v82-supply-online.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V8.2.1 contract
+      - name: V8.2.2 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.2.1'||v.stableBase!=='8.2.0'||v.channel!=='stable')throw Error('release inválida');
-          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['ensureEnterpriseNav','data-panel="supplyPanel"','Abastecimento'])if(!m.includes(x))throw Error('sidebar hotfix incompleto '+x);
-          const t=fs.readFileSync('v71-self-test.js','utf8');if(!t.includes('supply-sidebar-nav'))throw Error('teste de navegação ausente');
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-1'))throw Error('cache divergente');
-          if(h.version!=='8.2.1')throw Error('health divergente');
+          if(v.version!=='8.2.2'||v.stableBase!=='8.2.1'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['processSelected','fileInput.onchange','window.V81Supply?.importFile','v81ImportStatus'])if(!m.includes(x))throw Error('import hotfix incompleto '+x);
+          const t=fs.readFileSync('v71-self-test.js','utf8');if(!t.includes('supply-auto-import'))throw Error('teste auto import ausente');
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-2'))throw Error('cache divergente');
+          if(h.version!=='8.2.2')throw Error('health divergente');
           NODE
