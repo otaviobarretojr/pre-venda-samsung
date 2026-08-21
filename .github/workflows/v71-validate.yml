@@ -1,7 +1,7 @@
-name: V8.5.2 History Status Sync Validation
+name: V8.5.3 Full Audit Validation
 on:
   push:
-    branches: [v8.5.1-history-status]
+    branches: [v8.5.3-full-audit-fixes]
   pull_request:
     branches: [main]
 permissions:
@@ -16,20 +16,14 @@ jobs:
           node-version: '22'
       - name: JavaScript syntax
         run: |
-          node --check v71-config.js
-          node --check v741-deploy-guard.js
-          node --check v84-history.js
-          node --check v851-history-status.js
-          node --check v852-status-sync.js
-          node --check v71-self-test.js
-          node --check v7-release.js
-      - name: V8.5.2 history status sync contract
+          for f in *.js scripts/*.mjs; do node --check "$f"; done
+      - name: V8.5.3 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.5.2'||v.stableBase!=='8.5.1'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
-          const m=fs.readFileSync('v852-status-sync.js','utf8');
-          for(const x of ['status_venda','status_updated_at','cliente_avisado_at','retirado_at','method:\'PATCH\'','data-v852-status','MutationObserver','syncRemoteStatuses'])if(!m.includes(x))throw Error('sync de status incompleto '+x);
-          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-2'))throw Error('cache divergente');
-          if(h.version!=='8.5.2'||!h.requiredModules.includes('v852-status-sync.js'))throw Error('health divergente');
+          if(v.version!=='8.5.3'||v.stableBase!=='8.5.2'||v.channel!=='stable'||v.published!==true)throw Error('release inválida');
+          const c=fs.readFileSync('v853-compat.js','utf8');for(const x of ['Object.isFrozen','V71BudgetImport','V853Compat'])if(!c.includes(x))throw Error('compat ausente '+x);
+          const s=fs.readFileSync('v71-self-test.js','utf8');for(const x of ['dashboard-management','budget-import-hook','4300'])if(!s.includes(x))throw Error('self-test incompleto '+x);
+          if(!fs.readFileSync('service-worker.js','utf8').includes('pre-venda-samsung-v8-5-3'))throw Error('cache divergente');
+          if(h.version!=='8.5.3'||!h.requiredModules.includes('v853-compat.js'))throw Error('health divergente');
           NODE
