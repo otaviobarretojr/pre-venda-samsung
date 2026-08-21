@@ -2,6 +2,8 @@ name: Full V8.5.2 Inspection
 on:
   push:
     branches: [audit-v852-full-inspection]
+  pull_request:
+    branches: [main]
 permissions:
   contents: read
 jobs:
