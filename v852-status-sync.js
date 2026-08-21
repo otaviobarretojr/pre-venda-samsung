@@ -1,0 +1,28 @@
+(()=>{
+'use strict';
+const VERSION='8.5.2';
+const STATUS=['Aguardando produto','Cliente avisado','Retirado'];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const getHistorySafe=()=>{try{return typeof window.getHistory==='function'?window.getHistory():[]}catch{return[]}};
+const find=id=>getHistorySafe().find(x=>String(x.id)===String(id));
+const valueOf=r=>r?.statusVenda||r?.status_venda||'Aguardando produto';
+function recordIdFromNode(node){const html=node?.innerHTML||'';const m=html.match(/(?:loadRecord|printRecord)\(['"]([^'"]+)['"]\)/);return m?.[1]||node?.dataset?.recordId||''}
+function updateLocal(id,patch){const rows=getHistorySafe();const next=rows.map(x=>String(x.id)===String(id)?{...x,...patch}:x);try{window.setHistory?.(next)}catch(e){console.warn('[V8.5.2] local update',e)}return next.find(x=>String(x.id)===String(id))}
+async function persistRemote(id,status,now){const body={status_venda:status,status_updated_at:now,cliente_avisado_at:status==='Cliente avisado'?now:null,retirado_at:status==='Retirado'?now:null,updated_at:now};
+ if(status==='Retirado'){const current=find(id);body.cliente_avisado_at=current?.cliente_avisado_at||current?.clienteAvisadoAt||now}
+ if(window.V71Data?.request)return window.V71Data.request(`pre_vendas?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(body)});
+ throw Error('Camada online indisponível')}
+async function persistStatus(id,status,select){if(!STATUS.includes(status))return;const current=find(id);if(!current)return alert('Pré-venda não encontrada. Sincronize e tente novamente.');const previous=valueOf(current),now=new Date().toISOString();const patch={statusVenda:status,status_venda:status,statusUpdatedAt:now,status_updated_at:now};
+ if(status==='Cliente avisado'){patch.clienteAvisadoAt=current.clienteAvisadoAt||current.cliente_avisado_at||now;patch.cliente_avisado_at=patch.clienteAvisadoAt;patch.retiradoAt=null;patch.retirado_at=null}
+ if(status==='Retirado'){patch.clienteAvisadoAt=current.clienteAvisadoAt||current.cliente_avisado_at||now;patch.cliente_avisado_at=patch.clienteAvisadoAt;patch.retiradoAt=now;patch.retirado_at=now}
+ if(status==='Aguardando produto'){patch.clienteAvisadoAt=null;patch.cliente_avisado_at=null;patch.retiradoAt=null;patch.retirado_at=null}
+ updateLocal(id,patch);if(select){select.disabled=true;select.dataset.saving='1'}
+ try{const rows=await persistRemote(id,status,now);const remote=Array.isArray(rows)?rows[0]:null;if(remote)updateLocal(id,{...remote,statusVenda:remote.status_venda||status,statusUpdatedAt:remote.status_updated_at||now,clienteAvisadoAt:remote.cliente_avisado_at||null,retiradoAt:remote.retirado_at||null});window.enterpriseAudit?.('Status do cliente atualizado',`${current.numero||current.cliente||id} • ${status}`,id)}catch(e){updateLocal(id,{statusVenda:previous,status_venda:previous});alert('Não foi possível salvar o status online. Tente novamente.');console.error('[V8.5.2] persist status',e)}finally{if(select){select.disabled=false;delete select.dataset.saving}}
+ window.updateMetrics?.();window.renderHistory?.();setTimeout(decorate,0)}
+function control(id,current,compact=false){const v=current||'Aguardando produto';return `<label class="v851-status ${compact?'compact':''}"><span>${compact?'Andamento':'Status do cliente'}</span><select data-v852-status="${esc(id)}"><option ${v==='Aguardando produto'?'selected':''}>Aguardando produto</option><option ${v==='Cliente avisado'?'selected':''}>Cliente avisado</option><option ${v==='Retirado'?'selected':''}>Retirado</option></select></label>`}
+function decorate(){const box=document.getElementById('historyContent');if(!box)return;box.querySelectorAll('.pro-history-desktop tbody tr').forEach(tr=>{if(tr.querySelector('[data-v852-status]'))return;tr.querySelector('[data-v851-status]')?.closest('.v851-desktop-control')?.remove();const id=recordIdFromNode(tr),r=find(id),actions=tr.querySelector('.mini-actions')?.parentElement;if(!id||!r||!actions)return;const wrap=document.createElement('div');wrap.className='v851-desktop-control';wrap.innerHTML=control(id,valueOf(r));actions.prepend(wrap)});box.querySelectorAll('.pro-history-mobile .pro-history-card').forEach(card=>{if(card.querySelector('[data-v852-status]'))return;card.querySelector('[data-v851-status]')?.closest('.v851-mobile-control')?.remove();const id=recordIdFromNode(card),r=find(id),actions=card.querySelector('.pro-card-actions');if(!id||!r||!actions)return;const wrap=document.createElement('div');wrap.className='v851-mobile-control';wrap.innerHTML=control(id,valueOf(r),true);actions.before(wrap)});box.querySelectorAll('[data-v852-status]').forEach(sel=>{sel.onchange=()=>persistStatus(sel.dataset.v852Status,sel.value,sel)})}
+function patchStatusConsumers(){const hist=window.V84History;if(hist&&!hist.__v852){hist.__v852=true}const old=window.renderHistory;if(typeof old==='function'&&!old.__v852){const fn=function(){const r=old.apply(this,arguments);queueMicrotask(decorate);return r};fn.__v852=true;window.renderHistory=fn}}
+function observe(){const box=document.getElementById('historyContent');if(!box||box.__v852Observer)return;box.__v852Observer=true;let t;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(decorate,0)}).observe(box,{childList:true,subtree:true})}
+function boot(){patchStatusConsumers();observe();decorate();setInterval(()=>{observe();decorate()},2500);window.V852HistoryStatus={version:VERSION,persistStatus,decorate,valueOf,statuses:[...STATUS]}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,3000),{once:true});else setTimeout(boot,3000);
+})();
