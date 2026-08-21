@@ -1,7 +1,7 @@
-name: V7.4.1 Verified Deploy Validation
+name: V8.0 Operations Maturity Validation
 on:
   push:
-    branches: [v7.4.1-deploy-verification-final2]
+    branches: [v8.0-operations-maturity]
   pull_request:
     branches: [main]
 permissions:
@@ -25,22 +25,24 @@ jobs:
           node --check v73-operations.js
           node --check v74-polish.js
           node --check v741-deploy-guard.js
+          node --check v80-maturity.js
           node --check v71-self-test.js
           node --check v7-release.js
           node --check scripts/verify-production.mjs
-      - name: V7.4.1 contract
+      - name: V8.0 contract
         run: |
           node - <<'NODE'
-          const fs=require('fs');
-          const v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.4.1'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
-          if(v.stableBase!=='7.4.0'||v.dataArchitecture!==4)throw Error('base/arquitetura divergente');
+          const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
+          if(v.version!=='8.0.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
+          if(v.stableBase!=='7.4.1'||v.dataArchitecture!==4)throw Error('base/arquitetura divergente');
           if(v.canonicalHost!=='https://otaviobarretojr.github.io/pre-venda-samsung/')throw Error('host canônico inválido');
-          for(const f of ['v741-deploy-guard.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-4-1')||!sw.includes('v741-deploy-guard.js'))throw Error('cache divergente');
+          for(const f of ['v741-deploy-guard.js','v80-maturity.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
+          const m=fs.readFileSync('v80-maturity.js','utf8');for(const x of ['Saúde do sistema','Qualidade operacional','Possíveis duplicidades','Sem avanço +72h'])if(!m.includes(x))throw Error('maturity incompleta '+x);
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-0-0')||!sw.includes('v80-maturity.js'))throw Error('cache divergente');
+          if(!h.requiredModules.includes('v80-maturity.js'))throw Error('health incompleto');
           NODE
       - name: Stable base protection
         run: |
-          grep -q "stableBase:'7.4.0'" v71-config.js
-          grep -q "STABLE_BASE='7.4.0'" v7-release.js
+          grep -q "stableBase:'7.4.1'" v71-config.js
+          grep -q "STABLE_BASE='7.4.1'" v7-release.js
           test -f supabase-online-setup.sql
