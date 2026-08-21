@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V8.2.1 stable
+      - name: Validate V8.2.2 stable
         run: |
           node --check v741-deploy-guard.js
           node --check v81-abastecimento.js
@@ -30,9 +30,9 @@ jobs:
           node --check scripts/verify-production.mjs
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.2.1'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('Manifesto inválido');
-          if(v.stableBase!=='8.2.0'||h.version!==v.version)throw Error('base/health divergente');
-          const m=fs.readFileSync('v81-abastecimento.js','utf8');if(!m.includes('ensureEnterpriseNav')||!m.includes('data-panel="supplyPanel"'))throw Error('menu Abastecimento ausente');
+          if(v.version!=='8.2.2'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('Manifesto inválido');
+          if(v.stableBase!=='8.2.1'||h.version!==v.version)throw Error('base/health divergente');
+          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['processSelected','fileInput.onchange','window.V81Supply?.importFile'])if(!m.includes(x))throw Error('import automático ausente '+x);
           NODE
   deploy:
     needs: validate
@@ -67,7 +67,7 @@ jobs:
       - name: Verify published URL
         env:
           PRODUCTION_URL: ${{ needs.deploy.outputs.page_url }}
-          EXPECTED_VERSION: 8.2.1
+          EXPECTED_VERSION: 8.2.2
         run: node scripts/verify-production.mjs
       - name: Persist verified production proof
         uses: actions/github-script@v7
@@ -79,5 +79,5 @@ jobs:
             const path='verified-production.json';
             let sha;
             try { const current=await github.rest.repos.getContent({owner:context.repo.owner,repo:context.repo.repo,path,ref:'main'}); sha=current.data.sha; } catch(e) { if(e.status!==404) throw e; }
-            const payload={version:'8.2.1',status:'verified',canonicalHost:process.env.PRODUCTION_URL,verifiedAt:new Date().toISOString(),commit:context.sha};
-            await github.rest.repos.createOrUpdateFileContents({owner:context.repo.owner,repo:context.repo.repo,path,message:'ci: record verified V8.2.1 production [skip deploy]',content:Buffer.from(JSON.stringify(payload,null,2)+'\n').toString('base64'),sha,branch:'main'});
+            const payload={version:'8.2.2',status:'verified',canonicalHost:process.env.PRODUCTION_URL,verifiedAt:new Date().toISOString(),commit:context.sha};
+            await github.rest.repos.createOrUpdateFileContents({owner:context.repo.owner,repo:context.repo.repo,path,message:'ci: record verified V8.2.2 production [skip deploy]',content:Buffer.from(JSON.stringify(payload,null,2)+'\n').toString('base64'),sha,branch:'main'});
