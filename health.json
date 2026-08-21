@@ -1,6 +1,6 @@
 {
-  "version": "7.1.1",
-  "stableBase": "7.0.2",
+  "version": "7.2.0",
+  "stableBase": "7.1.1",
   "channel": "stable",
   "requiredModules": [
     "v71-config.js",
@@ -8,6 +8,7 @@
     "v71-budget-import.js",
     "v71-integration.js",
     "v711-stability.js",
+    "v72-core.js",
     "v71-self-test.js"
   ],
   "requiredTables": [
@@ -15,6 +16,9 @@
     "budgets",
     "budget_catalog",
     "ecosystem_catalog",
+    "sync_tombstones",
+    "data_backups",
+    "sync_events",
     "release_versions"
   ]
 }
