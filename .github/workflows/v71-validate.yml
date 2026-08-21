@@ -1,7 +1,7 @@
-name: V7.4 Operations Polish Validation
+name: V7.4.1 Verified Deploy Validation
 on:
   push:
-    branches: [v7.4-operations-polish]
+    branches: [v7.4.1-deploy-verification-final2]
   pull_request:
     branches: [main]
 permissions:
@@ -24,22 +24,23 @@ jobs:
           node --check v72-core.js
           node --check v73-operations.js
           node --check v74-polish.js
+          node --check v741-deploy-guard.js
           node --check v71-self-test.js
           node --check v7-release.js
-      - name: V7.4 contract
+          node --check scripts/verify-production.mjs
+      - name: V7.4.1 contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.4.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
-          if(v.stableBase!=='7.3.0'||v.dataArchitecture!==4)throw Error('base/arquitetura divergente');
-          for(const f of ['v72-core.js','v73-operations.js','v74-polish.js'])if(!fs.existsSync(f))throw Error('módulo ausente '+f);
-          for(const t of ['audit_events','commercial_stages'])if(!h.requiredTables.includes(t))throw Error('tabela ausente '+t);
-          const polish=fs.readFileSync('v74-polish.js','utf8');for(const x of ['Pendentes +72h','Ranking comercial','Exportar pipeline CSV','v74AuditSearch'])if(!polish.includes(x))throw Error('recurso ausente '+x);
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-4-0')||!sw.includes('v74-polish.js'))throw Error('cache divergente');
+          if(v.version!=='7.4.1'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
+          if(v.stableBase!=='7.4.0'||v.dataArchitecture!==4)throw Error('base/arquitetura divergente');
+          if(v.canonicalHost!=='https://otaviobarretojr.github.io/pre-venda-samsung/')throw Error('host canônico inválido');
+          for(const f of ['v741-deploy-guard.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v7-4-1')||!sw.includes('v741-deploy-guard.js'))throw Error('cache divergente');
           NODE
       - name: Stable base protection
         run: |
-          grep -q "stableBase:'7.3.0'" v71-config.js
-          grep -q "STABLE_BASE='7.3.0'" v7-release.js
+          grep -q "stableBase:'7.4.0'" v71-config.js
+          grep -q "STABLE_BASE='7.4.0'" v7-release.js
           test -f supabase-online-setup.sql

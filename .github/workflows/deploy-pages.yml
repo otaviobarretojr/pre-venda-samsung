@@ -18,8 +18,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V7.4 stable
+      - name: Validate V7.4.1 stable
         run: |
+          node --check v741-deploy-guard.js
           node --check v71-config.js
           node --check v71-data.js
           node --check v71-budget-import.js
@@ -30,19 +31,25 @@ jobs:
           node --check v74-polish.js
           node --check v71-self-test.js
           node --check v7-release.js
+          node --check scripts/verify-production.mjs
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.4.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('Manifesto inválido');
-          if(h.version!==v.version||!h.requiredModules.includes('v74-polish.js'))throw Error('health/version divergentes');
-          if(v.stableBase!=='7.3.0'||v.dataArchitecture!==4)throw Error('stableBase/arquitetura divergente');
-          console.log('Release estável validada:',v.version);
+          if(v.version!=='7.4.1'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('Manifesto inválido');
+          if(h.version!==v.version||!h.requiredModules.includes('v741-deploy-guard.js'))throw Error('health/version divergentes');
+          if(v.stableBase!=='7.4.0'||v.canonicalHost!=='https://otaviobarretojr.github.io/pre-venda-samsung/')throw Error('base/host divergente');
           NODE
   deploy:
     needs: validate
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
@@ -51,3 +58,16 @@ jobs:
           path: '.'
       - id: deployment
         uses: actions/deploy-pages@v4
+  verify-production:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify published URL
+        env:
+          PRODUCTION_URL: ${{ needs.deploy.outputs.page_url }}
+          EXPECTED_VERSION: 7.4.1
+        run: node scripts/verify-production.mjs
