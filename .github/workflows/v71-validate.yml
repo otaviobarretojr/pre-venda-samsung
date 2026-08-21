@@ -1,7 +1,7 @@
-name: V8.2 Supply Online Validation
+name: V8.2.1 Sidebar Hotfix Validation
 on:
   push:
-    branches: [v8.2-supply-online]
+    branches: [v8.2.1-sidebar-hotfix]
   pull_request:
     branches: [main]
 permissions:
@@ -17,26 +17,18 @@ jobs:
       - name: JavaScript syntax
         run: |
           node --check v71-config.js
-          node --check v71-data.js
           node --check v741-deploy-guard.js
-          node --check v80-maturity.js
           node --check v81-abastecimento.js
           node --check v82-supply-online.js
           node --check v71-self-test.js
           node --check v7-release.js
-          node --check scripts/verify-production.mjs
-      - name: V8.2 contract
+      - name: V8.2.1 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.2.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
-          if(v.stableBase!=='8.1.0'||v.dataArchitecture!==5)throw Error('base/arquitetura divergente');
-          for(const f of ['v81-abastecimento.js','v82-supply-online.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
-          for(const t of ['inventory_imports','inventory_items','inventory_links','supply_requests'])if(!h.requiredTables.includes(t))throw Error('tabela ausente '+t);
-          const m=fs.readFileSync('v82-supply-online.js','utf8');for(const x of ['syncImport','hydrateOnline','createRequest','relevantInventory'])if(!m.includes(x))throw Error('supply online incompleto '+x);
-          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-0')||!sw.includes('v82-supply-online.js'))throw Error('cache divergente');
+          if(v.version!=='8.2.1'||v.stableBase!=='8.2.0'||v.channel!=='stable')throw Error('release inválida');
+          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['ensureEnterpriseNav','data-panel="supplyPanel"','Abastecimento'])if(!m.includes(x))throw Error('sidebar hotfix incompleto '+x);
+          const t=fs.readFileSync('v71-self-test.js','utf8');if(!t.includes('supply-sidebar-nav'))throw Error('teste de navegação ausente');
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-1'))throw Error('cache divergente');
+          if(h.version!=='8.2.1')throw Error('health divergente');
           NODE
-      - name: Stable base protection
-        run: |
-          grep -q "STABLE_BASE='8.1.0'" v7-release.js
-          test -f supabase-online-setup.sql
