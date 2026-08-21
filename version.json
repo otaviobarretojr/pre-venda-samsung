@@ -1,10 +1,12 @@
 {
-  "version": "7.4.0",
-  "stableBase": "7.3.0",
+  "version": "7.4.1",
+  "stableBase": "7.4.0",
   "channel": "stable",
   "dataArchitecture": 4,
   "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog", "sync_tombstones", "data_backups", "sync_events", "audit_events", "commercial_stages"],
-  "focus": ["audit-filters", "management-insights", "pipeline-export", "operational-alerts", "safe-consolidation"],
+  "focus": ["verified-deploy", "canonical-host", "post-deploy-health", "cache-self-healing"],
+  "canonicalHost": "https://otaviobarretojr.github.io/pre-venda-samsung/",
+  "fallbackHost": "https://pre-venda-samsung.pages.dev/",
   "authentication": false,
   "published": true
 }
