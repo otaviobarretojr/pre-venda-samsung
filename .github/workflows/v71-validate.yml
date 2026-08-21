@@ -1,7 +1,7 @@
-name: V8.1 Supply Validation
+name: V8.2 Supply Online Validation
 on:
   push:
-    branches: [v8.1-abastecimento]
+    branches: [v8.2-supply-online]
   pull_request:
     branches: [main]
 permissions:
@@ -18,28 +18,25 @@ jobs:
         run: |
           node --check v71-config.js
           node --check v71-data.js
-          node --check v71-budget-import.js
-          node --check v71-integration.js
-          node --check v711-stability.js
-          node --check v72-core.js
-          node --check v73-operations.js
-          node --check v74-polish.js
           node --check v741-deploy-guard.js
           node --check v80-maturity.js
           node --check v81-abastecimento.js
+          node --check v82-supply-online.js
           node --check v71-self-test.js
           node --check v7-release.js
           node --check scripts/verify-production.mjs
-      - name: V8.1 contract
+      - name: V8.2 contract
         run: |
           node - <<'NODE'
           const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='8.1.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
-          if(v.stableBase!=='8.0.0'||v.dataArchitecture!==4)throw Error('base/arquitetura divergente');
-          for(const f of ['v80-maturity.js','v81-abastecimento.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
-          const m=fs.readFileSync('v81-abastecimento.js','utf8');for(const x of ['Abastecimento de Pré-venda','Importar inventário','Vincular produto','Solicitar '])if(!m.includes(x))throw Error('abastecimento incompleto '+x);
+          if(v.version!=='8.2.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('release inválida');
+          if(v.stableBase!=='8.1.0'||v.dataArchitecture!==5)throw Error('base/arquitetura divergente');
+          for(const f of ['v81-abastecimento.js','v82-supply-online.js','scripts/verify-production.mjs'])if(!fs.existsSync(f))throw Error('arquivo ausente '+f);
+          for(const t of ['inventory_imports','inventory_items','inventory_links','supply_requests'])if(!h.requiredTables.includes(t))throw Error('tabela ausente '+t);
+          const m=fs.readFileSync('v82-supply-online.js','utf8');for(const x of ['syncImport','hydrateOnline','createRequest','relevantInventory'])if(!m.includes(x))throw Error('supply online incompleto '+x);
+          const sw=fs.readFileSync('service-worker.js','utf8');if(!sw.includes('pre-venda-samsung-v8-2-0')||!sw.includes('v82-supply-online.js'))throw Error('cache divergente');
           NODE
       - name: Stable base protection
         run: |
-          grep -q "STABLE_BASE='8.0.0'" v7-release.js
+          grep -q "STABLE_BASE='8.1.0'" v7-release.js
           test -f supabase-online-setup.sql
