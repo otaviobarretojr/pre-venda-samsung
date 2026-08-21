@@ -1,19 +1,15 @@
 name: Deploy Pré-Venda Samsung
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: github-pages
   cancel-in-progress: false
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -22,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate V7.3 stable
+      - name: Validate V7.4 stable
         run: |
           node --check v71-config.js
           node --check v71-data.js
@@ -31,15 +27,14 @@ jobs:
           node --check v711-stability.js
           node --check v72-core.js
           node --check v73-operations.js
+          node --check v74-polish.js
           node --check v71-self-test.js
           node --check v7-release.js
           node - <<'NODE'
-          const fs=require('fs');
-          const v=JSON.parse(fs.readFileSync('version.json','utf8'));
-          const h=JSON.parse(fs.readFileSync('health.json','utf8'));
-          if(v.version!=='7.3.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false) throw new Error('Manifesto de produção inválido');
-          if(h.version!==v.version||!h.requiredModules.includes('v73-operations.js')) throw new Error('health/version divergentes');
-          if(v.stableBase!=='7.2.0'||v.dataArchitecture!==4) throw new Error('stableBase/arquitetura divergente');
+          const fs=require('fs'),v=JSON.parse(fs.readFileSync('version.json','utf8')),h=JSON.parse(fs.readFileSync('health.json','utf8'));
+          if(v.version!=='7.4.0'||v.channel!=='stable'||v.published!==true||v.authentication!==false)throw Error('Manifesto inválido');
+          if(h.version!==v.version||!h.requiredModules.includes('v74-polish.js'))throw Error('health/version divergentes');
+          if(v.stableBase!=='7.3.0'||v.dataArchitecture!==4)throw Error('stableBase/arquitetura divergente');
           console.log('Release estável validada:',v.version);
           NODE
   deploy:
