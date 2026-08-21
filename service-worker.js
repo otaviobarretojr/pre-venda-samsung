@@ -1,4 +1,4 @@
-const CACHE_NAME='pre-venda-samsung-v8-2-3';
+const CACHE_NAME='pre-venda-samsung-v8-2-4';
 const APP_SHELL=['./','./index.html','./v5.css','./v51.css','./v7-release.js','./v741-deploy-guard.js','./v71-config.js','./v71-data.js','./v71-budget-import.js','./v71-integration.js','./v711-stability.js','./v72-core.js','./v73-operations.js','./v74-polish.js','./v80-maturity.js','./v81-abastecimento.js','./v82-supply-online.js','./v71-self-test.js','./version.json','./health.json','./verified-production.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
