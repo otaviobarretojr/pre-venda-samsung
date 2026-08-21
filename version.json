@@ -1,10 +1,10 @@
 {
-  "version": "8.3.0",
-  "stableBase": "8.2.4",
+  "version": "8.4.0",
+  "stableBase": "8.3.0",
   "channel": "stable",
   "dataArchitecture": 5,
   "databases": ["pre_vendas", "budgets", "budget_catalog", "ecosystem_catalog", "sync_tombstones", "data_backups", "sync_events", "audit_events", "commercial_stages", "inventory_imports", "inventory_items", "inventory_links", "supply_requests"],
-  "focus": ["professional-supply-dashboard", "supply-filters", "monitored-products", "mobile-readability", "authoritative-inventory-snapshot", "verified-deploy"],
+  "focus": ["presale-only-history", "ephemeral-budgets", "professional-history-filters", "history-mobile-readability", "verified-deploy"],
   "canonicalHost": "https://otaviobarretojr.github.io/pre-venda-samsung/",
   "fallbackHost": "https://pre-venda-samsung.pages.dev/",
   "authentication": false,
